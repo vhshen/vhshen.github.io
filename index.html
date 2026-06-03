@@ -16,7 +16,11 @@
       --ink-muted: #6b6760;
       --ink-faint: #b5b2ab;
       --terracotta: #C4603A;
-      --olive: #5a6645;
+      --terracotta-dark: #bc6c25;
+      --light-orange: #dda15e;
+      --forest: #283618;
+      --meadow: #386641;
+      --olive: #606c38;
       --navy: #2b3a52;
       --rule: #dedad4;
       --card-bg: #ffffff;
@@ -67,10 +71,17 @@
       padding-bottom: 0.25rem;
     }
 
+    .site-tagline a {
+      color: var(--ink-muted);
+      text-decoration: none;
+    }
+
+    .site-tagline a:hover { color: var(--terracotta); }
+
     /* ── Main ── */
     main {
       padding: 0 4rem 6rem;
-      max-width: 1280px;
+      width: 100%;
     }
 
     /* ── Section ── */
@@ -89,7 +100,7 @@
       font-family: 'DM Serif Display', serif;
       font-size: 2rem;
       font-style: italic;
-      color: var(--ink);
+      color: var(--meadow);
       white-space: nowrap;
     }
 
@@ -108,11 +119,12 @@
 
     /* ── Grid ── */
     .project-grid {
-      display: flex;
+      display: inline-flex;
       flex-direction: row;
       gap: 1.5px;
       background: var(--rule);
       border: 1.5px solid var(--rule);
+      max-width: 100%;
       overflow-x: auto;
       scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch;
@@ -276,70 +288,30 @@
 </head>
 <body>
 
-<header>
-  <h1 class="site-name">Vivian <em>Shen</em></h1>
-  <p class="site-tagline">Research · Making · Art</p>
+<canvas id="sunflower-canvas" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
+
+<header style="position:relative;z-index:1;">
+  <h1 class="site-name">Vivian Shen · <em>Maker</em></h1>
+  <p class="site-tagline"><a href="./about.html">About</a> · <a href="https://www.vivian-shen.com">Main Website</a></p>
 </header>
 
-<main>
+<main style="position:relative;z-index:1;">
 
   <!-- ── TECH ── -->
   <section aria-label="Tech projects">
     <div class="section-header">
       <span class="section-label">Tech</span>
       <div class="section-rule"></div>
-      <span class="section-number">01</span>
+      <!-- <span class="section-number">01</span> -->
     </div>
     <div class="project-grid">
 
-      <a href="./fluid-reality/" class="project-card">
-        <div class="card-thumb">
-          <div class="card-thumb-placeholder">〜</div>
-        </div>
-        <div class="card-body">
-          <p class="card-tag tag-tech">Haptics · XR</p>
-          <h2 class="card-title">Fluid Reality</h2>
-          <p class="card-blurb">Fingertip haptics via electroosmotic pumps, delivering nuanced tactile sensations in virtual environments.</p>
-        </div>
-        <div class="card-arrow">
-          <svg viewBox="0 0 12 12"><path d="M2 10L10 2M10 2H4M10 2V8"/></svg>
-        </div>
-      </a>
-
-      <a href="./mouth-haptics/" class="project-card">
-        <div class="card-thumb">
-          <div class="card-thumb-placeholder">◎</div>
-        </div>
-        <div class="card-body">
-          <p class="card-tag tag-tech">Ultrasound · CHI 2022</p>
-          <h2 class="card-title">Mouth Haptics</h2>
-          <p class="card-blurb">Mid-air ultrasound phased arrays that deliver contactless tactile feedback inside the oral cavity.</p>
-        </div>
-        <div class="card-arrow">
-          <svg viewBox="0 0 12 12"><path d="M2 10L10 2M10 2H4M10 2V8"/></svg>
-        </div>
-      </a>
-
-      <a href="./synthetic-jets/" class="project-card">
-        <div class="card-thumb">
-          <div class="card-thumb-placeholder">≋</div>
-        </div>
-        <div class="card-body">
-          <p class="card-tag tag-tech">Airflow · Wearables</p>
-          <h2 class="card-title">Synthetic Jets</h2>
-          <p class="card-blurb">Wearable synthetic jet actuators for directional airflow feedback across the body surface.</p>
-        </div>
-        <div class="card-arrow">
-          <svg viewBox="0 0 12 12"><path d="M2 10L10 2M10 2H4M10 2V8"/></svg>
-        </div>
-      </a>
-
-      <a href="./kinethreads/" class="project-card">
+      <a href="https://www.vivian-shen.com/research/kinethreads" class="project-card">
         <div class="card-thumb">
           <div class="card-thumb-placeholder">⊗</div>
         </div>
         <div class="card-body">
-          <p class="card-tag tag-tech">Exosuit · UIST 2025</p>
+          <p class="card-tag tag-tech">RESEARCH · Exosuit · Haptics</p>
           <h2 class="card-title">Kinethreads</h2>
           <p class="card-blurb">Full-body, low-cost haptic exosuit using motor-pulley mechanisms for kinesthetic immersion.</p>
         </div>
@@ -348,7 +320,49 @@
         </div>
       </a>
 
-      <a href="./locolocomotion/" class="project-card">
+      <a href="https://www.vivian-shen.com/research/fluid-reality" class="project-card">
+        <div class="card-thumb">
+          <div class="card-thumb-placeholder">〜</div>
+        </div>
+        <div class="card-body">
+          <p class="card-tag tag-tech">RESEARCH · Haptics · XR</p>
+          <h2 class="card-title">Fluid Reality</h2>
+          <p class="card-blurb">Fingertip haptics via electroosmotic pumps, delivering nuanced tactile sensations in virtual environments.</p>
+        </div>
+        <div class="card-arrow">
+          <svg viewBox="0 0 12 12"><path d="M2 10L10 2M10 2H4M10 2V8"/></svg>
+        </div>
+      </a>
+
+      <a href="https://www.vivian-shen.com/research/mouthhaptics" class="project-card">
+        <div class="card-thumb">
+          <div class="card-thumb-placeholder">◎</div>
+        </div>
+        <div class="card-body">
+          <p class="card-tag tag-tech">RESEARCH · Haptics · XR</p>
+          <h2 class="card-title">Mouth Haptics</h2>
+          <p class="card-blurb">Mid-air ultrasound phased arrays that deliver contactless tactile feedback inside the oral cavity.</p>
+        </div>
+        <div class="card-arrow">
+          <svg viewBox="0 0 12 12"><path d="M2 10L10 2M10 2H4M10 2V8"/></svg>
+        </div>
+      </a>
+
+      <a href="https://www.vivian-shen.com/research/synjets" class="project-card">
+        <div class="card-thumb">
+          <div class="card-thumb-placeholder">≋</div>
+        </div>
+        <div class="card-body">
+          <p class="card-tag tag-tech">RESEARCH · Haptics</p>
+          <h2 class="card-title">Synthetic Jets</h2>
+          <p class="card-blurb">Wearable synthetic jet actuators for directional airflow feedback across the body surface.</p>
+        </div>
+        <div class="card-arrow">
+          <svg viewBox="0 0 12 12"><path d="M2 10L10 2M10 2H4M10 2V8"/></svg>
+        </div>
+      </a>
+
+      <!-- <a href="https://www.vivian-shen.com/research/locolocomotion" class="project-card">
         <div class="card-thumb">
           <div class="card-thumb-placeholder">⟳</div>
         </div>
@@ -360,7 +374,7 @@
         <div class="card-arrow">
           <svg viewBox="0 0 12 12"><path d="M2 10L10 2M10 2H4M10 2V8"/></svg>
         </div>
-      </a>
+      </a> -->
 
     </div>
   </section>
@@ -370,7 +384,7 @@
     <div class="section-header">
       <span class="section-label">Experience</span>
       <div class="section-rule"></div>
-      <span class="section-number">02</span>
+      <!-- <span class="section-number">02</span> -->
     </div>
     <div class="project-grid">
 
@@ -424,7 +438,7 @@
     <div class="section-header">
       <span class="section-label">Art</span>
       <div class="section-rule"></div>
-      <span class="section-number">03</span>
+      <!-- <span class="section-number">03</span> -->
     </div>
     <div class="project-grid">
 
@@ -475,10 +489,288 @@
 
 </main>
 
-<footer>
+<footer style="position:relative;z-index:1;">
   <p>© 2026 Vivian Shen · Carnegie Mellon University</p>
-  <a href="mailto:hello@vivian-shen.com">hello@vivian-shen.com</a>
+  <a href="mailto:vivianhshen@gmail.com">vivianhshen@gmail.com</a>
 </footer>
+
+<script>
+(function () {
+  const canvas = document.getElementById('sunflower-canvas');
+  const ctx = canvas.getContext('2d');
+
+  let mouseX = window.innerWidth / 2;
+  let mouseY = window.innerHeight / 2;
+
+  document.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+
+  const flowers = [];
+
+  function buildFlowers() {
+    flowers.length = 0;
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+
+    // Spread flowers across the bottom, with a few taller ones for depth
+    const positions = [
+      // x as fraction of W, baseY offset above bottom, stemLen, size
+      [0.03, 0],  [0.10, 0], [0.17, 0], [0.24, 0],
+      [0.31, 0],  [0.38, 0], [0.45, 0], [0.52, 0],
+      [0.59, 0],  [0.66, 0], [0.73, 0], [0.80, 0],
+      [0.87, 0],  [0.94, 0],
+    ];
+
+    // Seed deterministic randomness per position for consistent look
+    function seededRand(seed) {
+      const x = Math.sin(seed + 1) * 43758.5453123;
+      return x - Math.floor(x);
+    }
+
+    positions.forEach(([xf], i) => {
+      const r1 = seededRand(i * 3.1);
+      const r2 = seededRand(i * 3.1 + 1);
+      const r3 = seededRand(i * 3.1 + 2);
+      flowers.push({
+        x: xf * W + (r1 - 0.5) * 60,
+        baseY: H + 10,                          // rooted at bottom edge
+        stemLength: 80 + r2 * 200,
+        size: 16 + r3 * 18,
+        petalCount: 12 + Math.round(r1 * 6),
+        angle: -Math.PI / 2,
+        lerpSpeed: 0.025 + r2 * 0.025,
+      });
+    });
+  }
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    buildFlowers();
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  function drawFlower(f) {
+    const { x, baseY, stemLength, size, angle, petalCount } = f;
+
+    // Tip position
+    const tipX = x + Math.cos(angle) * stemLength;
+    const tipY = baseY + Math.sin(angle) * stemLength;
+
+    // Slight S-curve for stem
+    const ctrl1X = x + Math.cos(angle + 0.25) * stemLength * 0.45;
+    const ctrl1Y = baseY + Math.sin(angle + 0.25) * stemLength * 0.45;
+    const ctrl2X = x + Math.cos(angle - 0.1) * stemLength * 0.75;
+    const ctrl2Y = baseY + Math.sin(angle - 0.1) * stemLength * 0.75;
+
+    ctx.beginPath();
+    ctx.moveTo(x, baseY);
+    ctx.bezierCurveTo(ctrl1X, ctrl1Y, ctrl2X, ctrl2Y, tipX, tipY);
+    ctx.strokeStyle = 'rgba(56, 102, 65, 0.28)';
+    ctx.lineWidth = 2.2;
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+
+    // Petals
+    for (let p = 0; p < petalCount; p++) {
+      const pa = (p / petalCount) * Math.PI * 2;
+      const px = tipX + Math.cos(pa) * size * 0.85;
+      const py = tipY + Math.sin(pa) * size * 0.85;
+      ctx.beginPath();
+      ctx.ellipse(px, py, size * 0.48, size * 0.21, pa, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(221, 161, 94, 0.28)';
+      ctx.fill();
+    }
+
+    // Center disc
+    ctx.beginPath();
+    ctx.arc(tipX, tipY, size * 0.40, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(196, 96, 58, 0.32)';
+    ctx.fill();
+
+    // Inner seed ring
+    ctx.beginPath();
+    ctx.arc(tipX, tipY, size * 0.22, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(120, 50, 20, 0.28)';
+    ctx.fill();
+  }
+
+  const MAX_TILT = Math.PI / 5.5; // ~33° max lean from vertical
+
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    flowers.forEach(f => {
+      // Angle from flower base to cursor
+      const dx = mouseX - f.x;
+      const dy = mouseY - f.baseY;
+      let raw = Math.atan2(dy, dx);
+
+      // Clamp to within MAX_TILT of straight-up (-PI/2)
+      let delta = raw - (-Math.PI / 2);
+      while (delta >  Math.PI) delta -= Math.PI * 2;
+      while (delta < -Math.PI) delta += Math.PI * 2;
+      delta = Math.max(-MAX_TILT, Math.min(MAX_TILT, delta));
+      const target = -Math.PI / 2 + delta;
+
+      // Smooth lerp
+      f.angle += (target - f.angle) * f.lerpSpeed;
+
+      drawFlower(f);
+    });
+
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+})();
+</script>
+
+<script>
+(function () {
+  const ns = 'http://www.w3.org/2000/svg';
+
+  // Simple upright leaf SVG — tip at top (y≈1), base at bottom (y≈30)
+  function makeLeafSVG(w, h, opacity) {
+    const svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('viewBox', '0 0 20 32');
+    svg.setAttribute('width', w);
+    svg.setAttribute('height', h);
+    svg.style.display = 'block';
+
+    const p = document.createElementNS(ns, 'path');
+    p.setAttribute('d', 'M10 30 C4 23 1 16 1 9 C1 4 5 1 10 1 C15 1 19 4 19 9 C19 16 16 23 10 30Z');
+    p.setAttribute('fill', `rgba(56,102,65,${opacity})`);
+
+    const v = document.createElementNS(ns, 'line');
+    v.setAttribute('x1', '10'); v.setAttribute('y1', '28');
+    v.setAttribute('x2', '10'); v.setAttribute('y2', '2');
+    v.setAttribute('stroke', 'rgba(40,54,24,0.35)');
+    v.setAttribute('stroke-width', '0.9');
+
+    svg.appendChild(p);
+    svg.appendChild(v);
+    return svg;
+  }
+
+  // Leaf definitions — all point upward.
+  // bxf: base-x as fraction of card width  (0 = left edge, 1 = right edge)
+  // byf: base-y as fraction of card height  (0 = top edge, negative = above card)
+  // Leaves are positioned so their bottom-center is at (bxf*W, byf*H).
+  // rot: slight lean left (negative) or right (positive) from vertical.
+  const DEFS = [
+    // ── Top edge: bases along the top border, leaves extend upward ──
+    { bxf:  0.2, byf:  0.0,  w: 17, h: 24, rot: -14, delay:  0 },
+    { bxf:  0.28, byf: -0.01, w: 21, h: 30, rot:  -6, delay: 30 },
+    { bxf:  0.36, byf:  0.0,  w: 19, h: 27, rot: -18, delay: 60 },
+    { bxf:  0.42, byf:  0.0,  w: 19, h: 27, rot:   0, delay: 25 },
+    { bxf:  0.48, byf: -0.01, w: 23, h: 32, rot:   4, delay: 15 },
+    { bxf:  0.55, byf:  0.0,  w: 18, h: 25, rot:  -3, delay: 45 },
+    { bxf:  0.60, byf: -0.01, w: 22, h: 31, rot:  10, delay: 75 },
+    { bxf:  0.68, byf:  0.0,  w: 19, h: 27, rot:  -8, delay: 20 },
+    { bxf:  0.73, byf: -0.01, w: 21, h: 29, rot:  15, delay: 50 },
+    { bxf:  0.8, byf:  0.0,  w: 17, h: 24, rot:   6, delay: 80 },
+  ];
+
+  function createOverlay(card) {
+    const rect = card.getBoundingClientRect();
+    const W = rect.width, H = rect.height;
+
+    const wrap = document.createElement('div');
+    Object.assign(wrap.style, {
+      position: 'fixed',
+      left: rect.left + 'px', top: rect.top + 'px',
+      width: W + 'px', height: H + 'px',
+      pointerEvents: 'none', zIndex: '50', overflow: 'visible',
+    });
+
+    const leaves = DEFS.map(({ bxf, byf, w, h, rot, delay }, i) => {
+      const opacity = 0.50 + (i % 3) * 0.08;
+      const leaf = makeLeafSVG(w, h, opacity);
+
+      // Place so bottom-center of the SVG lands at (bxf*W, byf*H)
+      const bx = bxf * W;
+      const by = byf * H;
+      Object.assign(leaf.style, {
+        position: 'absolute',
+        left: (bx - w / 2) + 'px',
+        top:  (by - h) + 'px',
+        transformOrigin: '50% 100%',         // pivot at the base of the leaf
+        transform: `rotate(${rot}deg) scale(0)`,
+        transition: `transform 300ms cubic-bezier(0.34,1.56,0.64,1) ${delay}ms`,
+      });
+
+      wrap.appendChild(leaf);
+      return leaf;
+    });
+
+    document.body.appendChild(wrap);
+    return { wrap, leaves };
+  }
+
+  // ── Shared state ──
+  let activeCard = null;
+  let ov = null;
+  let killTimer = null;
+  let mouseX = 0, mouseY = 0;
+
+  document.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+
+  function showLeaves(card) {
+    clearTimeout(killTimer);
+    if (ov) { ov.wrap.remove(); ov = null; }
+    activeCard = card;
+    ov = createOverlay(card);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (!ov) return;
+      ov.leaves.forEach((leaf, i) => {
+        leaf.style.transform = `rotate(${DEFS[i].rot}deg) scale(1)`;
+      });
+    }));
+  }
+
+  function hideLeaves() {
+    if (!ov) return;
+    const { wrap, leaves } = ov;
+    ov = null;
+    activeCard = null;
+    leaves.forEach((leaf, i) => {
+      leaf.style.transition = `transform 180ms ease-in ${Math.floor(DEFS[i].delay * 0.3)}ms`;
+      leaf.style.transform = `rotate(${DEFS[i].rot}deg) scale(0)`;
+    });
+    killTimer = setTimeout(() => wrap.remove(), 420);
+  }
+
+  // On scroll: reposition overlay if mouse is still over the same card,
+  // otherwise dismiss and check if a new card is now under the cursor.
+  window.addEventListener('scroll', () => {
+    if (activeCard) {
+      const r = activeCard.getBoundingClientRect();
+      const stillOver = mouseX >= r.left && mouseX <= r.right &&
+                        mouseY >= r.top  && mouseY <= r.bottom;
+      if (stillOver) {
+        // Follow the card as it scrolls
+        if (ov) { ov.wrap.style.left = r.left + 'px'; ov.wrap.style.top = r.top + 'px'; }
+        return;
+      }
+      hideLeaves();
+    }
+
+    // Check if the cursor is now over a different card
+    const el = document.elementFromPoint(mouseX, mouseY);
+    const newCard = el && el.closest('.project-card');
+    if (newCard) showLeaves(newCard);
+  }, { passive: true, capture: true });
+
+  document.querySelectorAll('.project-card').forEach(card => {
+    card.addEventListener('mouseenter', () => showLeaves(card));
+    card.addEventListener('mouseleave', hideLeaves);
+  });
+})();
+</script>
 
 </body>
 </html>

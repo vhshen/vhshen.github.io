@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About · Vivian Shen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #F5F2EC;
+      --ink: #1a1814;
+      --ink-muted: #6b6760;
+      --ink-faint: #b5b2ab;
+      --terracotta: #C4603A;
+      --terracotta-dark: #bc6c25;
+      --light-orange: #dda15e;
+      --forest: #283618;
+      --meadow: #386641;
+      --olive: #606c38;
+      --navy: #2b3a52;
+      --rule: #dedad4;
+      --card-bg: #ffffff;
+      --hover-bg: #f0ede6;
+    }
+
+    html { font-size: 16px; }
+
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      padding: 4rem 4rem 2.5rem;
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .site-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: var(--ink);
+      text-decoration: none;
+    }
+
+    .site-name em {
+      font-style: italic;
+      color: var(--terracotta);
+    }
+
+    .site-tagline {
+      font-size: 0.85rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      font-weight: 400;
+      padding-bottom: 0.25rem;
+    }
+
+    .site-tagline a {
+      color: var(--ink-muted);
+      text-decoration: none;
+    }
+
+    .site-tagline a:hover { color: var(--terracotta); }
+
+    /* ── Main ── */
+    main {
+      padding: 4rem 4rem 6rem;
+      max-width: 1200px;
+    }
+
+    /* ── About layout ── */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 4rem;
+      align-items: start;
+    }
+
+    .about-photo {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
+      display: block;
+      border: 1.5px solid var(--rule);
+    }
+
+    .about-photo-placeholder {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      background: var(--card-bg);
+      border: 1.5px solid var(--rule);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      font-size: 3rem;
+      color: var(--ink-faint);
+    }
+
+    .about-text h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.5rem;
+      font-style: italic;
+      color: var(--meadow);
+      line-height: 1.15;
+      margin-bottom: 1.5rem;
+    }
+
+    .about-text p {
+      font-size: 0.95rem;
+      color: var(--ink-muted);
+      line-height: 1.75;
+      margin-bottom: 1rem;
+    }
+
+    .about-text p a {
+      color: var(--terracotta);
+      text-decoration: none;
+    }
+
+    .about-text p a:hover {
+      text-decoration: underline;
+    }
+
+    .about-links {
+      margin-top: 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .about-link {
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 500;
+      color: var(--ink-muted);
+      text-decoration: none;
+      border: 1px solid var(--rule);
+      padding: 0.45rem 0.9rem;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .about-link:hover {
+      color: var(--terracotta);
+      border-color: var(--terracotta);
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--rule);
+      padding: 2rem 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    footer p {
+      font-size: 0.8rem;
+      color: var(--ink-faint);
+    }
+
+    footer a {
+      color: var(--ink-muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+    }
+
+    footer a:hover { color: var(--terracotta); }
+
+    @media (max-width: 640px) {
+      header, main, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+      header { padding-top: 2.5rem; }
+      main { padding-top: 2.5rem; }
+      .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .about-photo-placeholder { aspect-ratio: 1 / 1; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <a href="./index.html" class="site-name">Vivian Shen · <em>Maker</em></a>
+  <p class="site-tagline"><a href="./index.html">Home</a> · <a href="https://www.vivian-shen.com">Main Website</a></p>
+</header>
+
+<main>
+  <div class="about-grid">
+    <div>
+      <img class="about-photo" src="static/images/headshot2.jpg" alt="Vivian Shen" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+      <div class="about-photo-placeholder" style="display:none;">✦</div>
+    </div>
+    <div class="about-text">
+      <h2>Hi, I'm Vivian!</h2>
+      <p>
+        I am currently an assistant professor at Carnegie Mellon's <a href="https://etc.cmu.edu">Entertainment Technology Center</a>. 
+        I have a PhD from Carnegie Mellon's <a href="https://www.ri.cmu.edu/">Robotics Institute</a>. 
+        I was advised by Prof. <a href="https://www.chrisharrison.net/">Chris Harrison</a> in the <a href="https://www.hcii.cmu.edu/">Human Computer Interaction Institute</a>, and my research primarily focuses on novel input and output techniques.
+        Please see my <a href="https://www.vivian-shen.com">main page</a> for more details on my research and career!
+      </p>
+      <!-- <p>
+        I graduated from <a href="https://www.engineering.columbia.edu/">Columbia University</a> with a BS in computer science.
+      </p> -->
+      <p>
+        I've worked at <a href="https://www.microsoft.com/en-us/research/">Microsoft Research</a>, <a href="https://tech.facebook.com/reality-labs/">Meta Reality Labs</a>, <a href="https://la.disneyresearch.com/">Disney</a>, <a href="https://institute.sandiegozoo.org/">San Diego Zoo</a>, <a href="https://conservationxlabs.com/">Conservation X Labs</a>, and <a href="https://www.jpl.nasa.gov/">NASA</a>.
+      </p>
+      <p>
+        In my free time I enjoy creating the projects you see here, as well as play a lot of ultimate frisbee.
+      </p>
+      <div class="about-links">
+        <a class="about-link" href="mailto:vhshen@cmu.edu">Email</a>
+        <a class="about-link" href="https://linkedin.com/in/vhshen">LinkedIn</a>
+        <a class="about-link" href="https://github.com/vhshen">GitHub</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>© 2026 Vivian Shen · Carnegie Mellon University</p>
+  <a href="mailto:vhshen@cmu.edu">vhshen@cmu.edu</a>
+</footer>
+
+</body>
+</html>
