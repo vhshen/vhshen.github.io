@@ -1,93 +1,484 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <script src="http://code.jquery.com/jquery-3.3.1.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
-    <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
-    <script type="text/javascript" src="{{ url_for('static', filename = 'layout.js') }}"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vivian Shen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <style>
-        body{
-            background-color: #FCDFD9;
-            height: 100%;
-            width: 100%;
-        }
+    :root {
+      --cream: #F5F2EC;
+      --ink: #1a1814;
+      --ink-muted: #6b6760;
+      --ink-faint: #b5b2ab;
+      --terracotta: #C4603A;
+      --olive: #5a6645;
+      --navy: #2b3a52;
+      --rule: #dedad4;
+      --card-bg: #ffffff;
+      --hover-bg: #f0ede6;
+    }
 
-        h1{
-            margin-top: 5%;
-            font-family: Poppins;
-            color: #D90429;
-            font-size: 50px;
-        }
-        p{
-            font-family: Montserrat;
-            color: #2E1E0F;
-            line-height: 200%;
-        }
-        h4{
-            font-family: Poppins;
-            color: #D90429;
-        }
-        a{
-            color: #A73997;
-        }
-        a:hover{
-            color: #6576F6;
-        }
+    html { font-size: 16px; }
 
-        .space{
-           margin-right: 30px;
-        }
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
 
-        .meimg{
-           width: 100%;
-           margin-top: 20%;
-        }
+    /* ── Header ── */
+    header {
+      padding: 4rem 4rem 2.5rem;
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
 
-        .icon{
-            height: 30px;
-            width: 30px;
-            margin-top: 10px;
-            margin-right: 20px;
-        }
-        .icon:hover{
-            opacity: 50%;
-        }
+    .site-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: var(--ink);
+    }
 
-    </style>
+    .site-name em {
+      font-style: italic;
+      color: var(--terracotta);
+    }
 
+    .site-tagline {
+      font-size: 0.85rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      font-weight: 400;
+      padding-bottom: 0.25rem;
+    }
+
+    /* ── Main ── */
+    main {
+      padding: 0 4rem 6rem;
+      max-width: 1280px;
+    }
+
+    /* ── Section ── */
+    section {
+      padding-top: 4rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .section-label {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2rem;
+      font-style: italic;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+
+    .section-rule {
+      flex: 1;
+      height: 1px;
+      background: var(--rule);
+    }
+
+    .section-number {
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      color: var(--ink-faint);
+      font-weight: 400;
+    }
+
+    /* ── Grid ── */
+    .project-grid {
+      display: flex;
+      flex-direction: row;
+      gap: 1.5px;
+      background: var(--rule);
+      border: 1.5px solid var(--rule);
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: var(--ink-faint) transparent;
+    }
+
+    .project-grid::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    .project-grid::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .project-grid::-webkit-scrollbar-thumb {
+      background: var(--ink-faint);
+      border-radius: 2px;
+    }
+
+    /* ── Card ── */
+    .project-card {
+      background: var(--card-bg);
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.18s ease;
+      flex: 0 0 280px;
+      scroll-snap-align: start;
+    }
+
+    .project-card:hover {
+      background: var(--hover-bg);
+    }
+
+    .project-card:hover .card-arrow {
+      opacity: 1;
+      transform: translate(0, 0);
+    }
+
+    .project-card:hover .card-thumb img {
+      transform: scale(1.04);
+    }
+
+    .card-thumb {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      overflow: hidden;
+      background: #e8e4dc;
+      position: relative;
+    }
+
+    .card-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s ease;
+    }
+
+    .card-thumb-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      font-size: 2rem;
+      color: var(--ink-faint);
+      user-select: none;
+    }
+
+    .card-body {
+      padding: 1.25rem 1.25rem 1.5rem;
+    }
+
+    .card-tag {
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-weight: 500;
+      margin-bottom: 0.4rem;
+    }
+
+    .tag-tech { color: var(--navy); }
+    .tag-experience { color: var(--olive); }
+    .tag-art { color: var(--terracotta); }
+
+    .card-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.2rem;
+      line-height: 1.25;
+      margin-bottom: 0.5rem;
+      color: var(--ink);
+    }
+
+    .card-blurb {
+      font-size: 0.88rem;
+      color: var(--ink-muted);
+      line-height: 1.55;
+    }
+
+    .card-arrow {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 28px;
+      height: 28px;
+      border: 1px solid var(--rule);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--card-bg);
+      opacity: 0;
+      transform: translate(4px, -4px);
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .card-arrow svg {
+      width: 12px;
+      height: 12px;
+      stroke: var(--ink);
+      fill: none;
+      stroke-width: 1.5;
+    }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--rule);
+      padding: 2rem 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    footer p {
+      font-size: 0.8rem;
+      color: var(--ink-faint);
+    }
+
+    footer a {
+      color: var(--ink-muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+    }
+
+    footer a:hover { color: var(--terracotta); }
+
+    @media (max-width: 640px) {
+      header, main, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+      header { padding-top: 2.5rem; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="row">
-            <div class="col-md-5 space">
-                <img class="meimg" src="static/images/headshot2.jpg" alt="Me!"/>
-            </div>
-            <div class="col-md-6 align-self-center text">
-                <div class="row"><h1>Hi, I'm Vivian!</h1></div>
-                <div class="row"></div>
-                <div class="row"><p>I'm currently pursuing a PhD at Carnegie Mellon's <a href="https://www.ri.cmu.edu/" target="_blank">Robotics Institute</a>.
-                <br>
-                I graduated from <a href="https://www.engineering.columbia.edu/" target="_blank">Columbia University</a> with a BS in computer science.
-                <br>
-                I've worked at <a href="https://la.disneyresearch.com/" target="_blank">Disney</a>, <a href="https://institute.sandiegozoo.org/" target="_blank">San Diego Zoo</a>, <a href="https://conservationxlabs.com/" target="_blank">Conservation X Labs</a>, and <a href="https://www.jpl.nasa.gov/" target="_blank">NASA</a>.
-                <br>
-                In my free time I <a href="https://medium.com/@vhshen" target="_blank">write</a>, <a href="https://www.instagram.com/jr.scout.viv/" target="_blank">take photos</a>, and play a LOT of ultimate frisbee.
-                <br>
-                </p></div>
-                <div class="row"><h4>Connect with me!</h4></div>
-                <div class="row">
-                    <a href="mailto:vivianhshen@gmail.com" target="_blank"><img class="icon" src="static/images/email.png" title="email"></a>
-                    <a href="https://linkedin.com/in/vhshen"target="_blank"><img class="icon" src="static/images/linkedin.png" title="linkedin"></a>
-                    <a href="https://github.com/vhshen"target="_blank"><img class="icon" src="static/images/github.png" title="github"></a>
-                    <a href="https://devpost.com/vhshen"target="_blank"><img class="icon" src="static/images/devpost.png" title="devpost"></a>
-                    <a href="static/Vivian_Shen_Resume.pdf"target="_blank"><img class="icon" src="static/images/resume.png" title="resume"></a>
-                </div>
-            </div>
-        </div>
+
+<header>
+  <h1 class="site-name">Vivian <em>Shen</em></h1>
+  <p class="site-tagline">Research · Making · Art</p>
+</header>
+
+<main>
+
+  <!-- ── TECH ── -->
+  <section aria-label="Tech projects">
+    <div class="section-header">
+      <span class="section-label">Tech</span>
+      <div class="section-rule"></div>
+      <span class="section-number">01</span>
     </div>
+    <div class="project-grid">
+
+      <a href="./fluid-reality/" class="project-card">
+        <div class="card-thumb">
+          <div class="card-thumb-placeholder">〜</div>
+        </div>
+        <div class="card-body">
+          <p class="card-tag tag-tech">Haptics · XR</p>
+          <h2 class="card-title">Fluid Reality</h2>
+          <p class="card-blurb">Fingertip haptics via electroosmotic pumps, delivering nuanced tactile sensations in virtual environments.</p>
+        </div>
+        <div class="card-arrow">
+          <svg viewBox="0 0 12 12"><path d="M2 10L10 2M10 2H4M10 2V8"/></svg>
+        </div>
+      </a>
+
+      <a href="./mouth-haptics/" class="project-card">
+        <div class="card-thumb">
+          <div class="card-thumb-placeholder">◎</div>
+        </div>
+        <div class="card-body">
+          <p class="card-tag tag-tech">Ultrasound · CHI 2022</p>
+          <h2 class="card-title">Mouth Haptics</h2>
+          <p class="card-blurb">Mid-air ultrasound phased arrays that deliver contactless tactile feedback inside the oral cavity.</p>
+        </div>
+        <div class="card-arrow">
+          <svg viewBox="0 0 12 12"><path d="M2 10L10 2M10 2H4M10 2V8"/></svg>
+        </div>
+      </a>
+
+      <a href="./synthetic-jets/" class="project-card">
+        <div class="card-thumb">
+          <div class="card-thumb-placeholder">≋</div>
+        </div>
+        <div class="card-body">
+          <p class="card-tag tag-tech">Airflow · Wearables</p>
+          <h2 class="card-title">Synthetic Jets</h2>
+          <p class="card-blurb">Wearable synthetic jet actuators for directional airflow feedback across the body surface.</p>
+        </div>
+        <div class="card-arrow">
+          <svg viewBox="0 0 12 12"><path d="M2 10L10 2M10 2H4M10 2V8"/></svg>
+        </div>
+      </a>
+
+      <a href="./kinethreads/" class="project-card">
+        <div class="card-thumb">
+          <div class="card-thumb-placeholder">⊗</div>
+        </div>
+        <div class="card-body">
+          <p class="card-tag tag-tech">Exosuit · UIST 2025</p>
+          <h2 class="card-title">Kinethreads</h2>
+          <p class="card-blurb">Full-body, low-cost haptic exosuit using motor-pulley mechanisms for kinesthetic immersion.</p>
+        </div>
+        <div class="card-arrow">
+          <svg viewBox="0 0 12 12"><path d="M2 10L10 2M10 2H4M10 2V8"/></svg>
+        </div>
+      </a>
+
+      <a href="./locolocomotion/" class="project-card">
+        <div class="card-thumb">
+          <div class="card-thumb-placeholder">⟳</div>
+        </div>
+        <div class="card-body">
+          <p class="card-tag tag-tech">Locomotion · VR</p>
+          <h2 class="card-title">Locolocomotion</h2>
+          <p class="card-blurb">Omnidirectional treadmill prototype with rolling ball mechanisms enabling free lateral VR traversal.</p>
+        </div>
+        <div class="card-arrow">
+          <svg viewBox="0 0 12 12"><path d="M2 10L10 2M10 2H4M10 2V8"/></svg>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ── EXPERIENCE ── -->
+  <section aria-label="Experience projects">
+    <div class="section-header">
+      <span class="section-label">Experience</span>
+      <div class="section-rule"></div>
+      <span class="section-number">02</span>
+    </div>
+    <div class="project-grid">
+
+      <a href="./teaching/" class="project-card">
+        <div class="card-thumb">
+          <div class="card-thumb-placeholder">✦</div>
+        </div>
+        <div class="card-body">
+          <p class="card-tag tag-experience">CMU ETC · Teaching</p>
+          <h2 class="card-title">Modern Making</h2>
+          <p class="card-blurb">Course on physical fabrication, Arduino, and creative technology at Carnegie Mellon's Entertainment Technology Center.</p>
+        </div>
+        <div class="card-arrow">
+          <svg viewBox="0 0 12 12"><path d="M2 10L10 2M10 2H4M10 2V8"/></svg>
+        </div>
+      </a>
+
+      <a href="./chi2026/" class="project-card">
+        <div class="card-thumb">
+          <div class="card-thumb-placeholder">▲</div>
+        </div>
+        <div class="card-body">
+          <p class="card-tag tag-experience">Conference · Pittsburgh</p>
+          <h2 class="card-title">CHI 2026</h2>
+          <p class="card-blurb">Creative direction and local organizing for CHI 2026 in Pittsburgh — branding, rally towels, and three-rivers identity.</p>
+        </div>
+        <div class="card-arrow">
+          <svg viewBox="0 0 12 12"><path d="M2 10L10 2M10 2H4M10 2V8"/></svg>
+        </div>
+      </a>
+
+      <a href="./uist-sic/" class="project-card">
+        <div class="card-thumb">
+          <div class="card-thumb-placeholder">⬡</div>
+        </div>
+        <div class="card-body">
+          <p class="card-tag tag-experience">UIST · Organizing</p>
+          <h2 class="card-title">UIST Student Innovation Contest</h2>
+          <p class="card-blurb">Co-chairing the UIST SIC in partnership with EmotiBit, including theme design and promo video production.</p>
+        </div>
+        <div class="card-arrow">
+          <svg viewBox="0 0 12 12"><path d="M2 10L10 2M10 2H4M10 2V8"/></svg>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ── ART ── -->
+  <section aria-label="Art projects">
+    <div class="section-header">
+      <span class="section-label">Art</span>
+      <div class="section-rule"></div>
+      <span class="section-number">03</span>
+    </div>
+    <div class="project-grid">
+
+      <a href="./pop-art/" class="project-card">
+        <div class="card-thumb">
+          <div class="card-thumb-placeholder">◈</div>
+        </div>
+        <div class="card-body">
+          <p class="card-tag tag-art">Illustration · Print</p>
+          <h2 class="card-title">Warhol-Style Pop Art</h2>
+          <p class="card-blurb">CHI-themed pop art logo series drawing on Warhol's signature palette and repetition structures.</p>
+        </div>
+        <div class="card-arrow">
+          <svg viewBox="0 0 12 12"><path d="M2 10L10 2M10 2H4M10 2V8"/></svg>
+        </div>
+      </a>
+
+      <a href="./incline-icon/" class="project-card">
+        <div class="card-thumb">
+          <div class="card-thumb-placeholder">∧</div>
+        </div>
+        <div class="card-body">
+          <p class="card-tag tag-art">SVG · Iconography</p>
+          <h2 class="card-title">Duquesne Incline Icon</h2>
+          <p class="card-blurb">Hand-crafted SVG icon of Pittsburgh's historic Duquesne Incline, designed for conference branding.</p>
+        </div>
+        <div class="card-arrow">
+          <svg viewBox="0 0 12 12"><path d="M2 10L10 2M10 2H4M10 2V8"/></svg>
+        </div>
+      </a>
+
+      <a href="./solosound-viz/" class="project-card">
+        <div class="card-thumb">
+          <div class="card-thumb-placeholder">◉</div>
+        </div>
+        <div class="card-body">
+          <p class="card-tag tag-art">Processing · Data viz</p>
+          <h2 class="card-title">Biosignal Orb</h2>
+          <p class="card-blurb">Processing sketch visualizing live biosignals as a breathing "stress thermostat" orb for the UIST SIC promo.</p>
+        </div>
+        <div class="card-arrow">
+          <svg viewBox="0 0 12 12"><path d="M2 10L10 2M10 2H4M10 2V8"/></svg>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>© 2026 Vivian Shen · Carnegie Mellon University</p>
+  <a href="mailto:hello@vivian-shen.com">hello@vivian-shen.com</a>
+</footer>
+
 </body>
 </html>
