@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hand Gesture Stick Figure</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0f;
+    color: #e8e8f0;
+    font-family: 'Courier New', monospace;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  #ui-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background: rgba(255,255,255,0.04);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    z-index: 10;
+    flex-shrink: 0;
+  }
+  #title { font-size: 13px; letter-spacing: 3px; text-transform: uppercase; color: #7c6af7; }
+  #gesture-label { font-size: 12px; letter-spacing: 2px; color: #888; min-width: 180px; text-align: center; }
+  #status-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #444;
+    display: inline-block; margin-right: 8px; transition: background 0.3s;
+  }
+  #status-dot.active { background: #4afa9a; box-shadow: 0 0 8px #4afa9a88; }
+  #scene { flex: 1; position: relative; overflow: hidden; }
+  #game-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: crosshair; }
+  #cam-preview {
+    position: absolute; top: 16px; right: 16px;
+    width: 180px; height: 135px; border-radius: 8px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.12); background: #111; z-index: 5;
+  }
+  #cam-video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); opacity: 0.7; }
+  #hand-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+  #start-screen {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; background: #0a0a0f; z-index: 20; gap: 24px;
+  }
+  #start-screen h1 { font-size: 28px; letter-spacing: 6px; text-transform: uppercase; color: #7c6af7; }
+  #start-screen p { font-size: 13px; color: #888; letter-spacing: 1px; max-width: 440px; text-align: center; line-height: 1.8; }
+  .gesture-hint { display: flex; gap: 16px; margin-top: 8px; flex-wrap: wrap; justify-content: center; }
+  .hint-item {
+    background: rgba(124,106,247,0.1); border: 1px solid rgba(124,106,247,0.25);
+    border-radius: 8px; padding: 10px 14px; font-size: 11px; color: #a89cf7;
+    letter-spacing: 1px; text-align: center; min-width: 105px;
+  }
+  #start-btn {
+    background: #7c6af7; color: white; border: none; padding: 14px 40px;
+    font-family: 'Courier New', monospace; font-size: 13px; letter-spacing: 3px;
+    text-transform: uppercase; border-radius: 6px; cursor: pointer;
+    transition: background 0.2s, transform 0.1s; margin-top: 8px;
+  }
+  #start-btn:hover { background: #9080fa; transform: scale(1.02); }
+  #controls-bar {
+    font-size: 11px; letter-spacing: 1.5px; color: #6a6a8a;
+    text-transform: uppercase; padding: 0 20px;
+  }
+  #score-display { font-size: 12px; color: #666; letter-spacing: 2px; }
+  #score-display span { color: #e8e8f0; }
+  #edit-hint { font-size: 10px; color: #444; letter-spacing: 1px; position: absolute; bottom: 8px; left: 20px; pointer-events: none; }
+  #spawn-bar {
+    position: absolute; top: 64px; left: 50%; transform: translateX(-50%);
+    display: none; align-items: center; gap: 8px;
+    background: rgba(10,10,18,0.8); border: 1px solid rgba(124,106,247,0.2);
+    border-radius: 10px; padding: 8px 14px; z-index: 6; backdrop-filter: blur(4px);
+  }
+  .spawn-btn {
+    background: rgba(124,106,247,0.12); border: 1px solid rgba(124,106,247,0.35);
+    color: #a89cf7; font-family: 'Courier New', monospace; font-size: 11px;
+    letter-spacing: 1px; padding: 6px 14px; border-radius: 6px; cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .spawn-btn:hover { background: rgba(124,106,247,0.28); border-color: rgba(168,156,247,0.7); color: #e0d8ff; }
+  .spawn-btn:active { transform: scale(0.96); }
+</style>
+</head>
+<body>
+
+<div id="ui-bar">
+  <div id="title">gesture.io</div>
+  <div id="gesture-label"><span id="status-dot"></span><span id="gesture-text">no hand detected</span></div>
+  <div id="score-display">COINS <span id="score">0</span></div>
+</div>
+
+<div id="scene">
+  <canvas id="game-canvas"></canvas>
+  <div id="spawn-bar">
+    <span style="font-size:10px;color:#555;letter-spacing:1px;margin-right:8px;">SPAWN</span>
+    <button class="spawn-btn" onclick="spawnElement('platform')">Platform</button>
+    <button class="spawn-btn" onclick="spawnElement('cactus')">Cactus</button>
+    <button class="spawn-btn" onclick="spawnElement('spike')">Spike</button>
+  </div>
+  <div id="cam-preview">
+    <video id="cam-video" autoplay muted playsinline></video>
+    <canvas id="hand-overlay"></canvas>
+  </div>
+  <div id="edit-hint">DRAG PLATFORMS &amp; OBSTACLES TO REARRANGE</div>
+  <div id="start-screen">
+    <h1>Gesture Play</h1>
+    <p>Control your stick figure with your hand. The world scrolls as you move — explore left and right!</p>
+    <div class="gesture-hint">
+      <div class="hint-item">Index Up<br>walk left</div>
+      <div class="hint-item">Pinky Up<br>walk right</div>
+      <div class="hint-item">Thumb Out<br>jump</div>
+    </div>
+    <button id="start-btn" onclick="startGame()">Start Camera</button>
+    <p style="font-size:11px; color:#555; margin-top:-8px;">camera stays private — no data leaves your browser</p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+<script>
+
+const gameCanvas = document.getElementById('game-canvas');
+const ctx = gameCanvas.getContext('2d');
+const handOverlay = document.getElementById('hand-overlay');
+const hctx = handOverlay.getContext('2d');
+const video = document.getElementById('cam-video');
+const gestureText = document.getElementById('gesture-text');
+const statusDot = document.getElementById('status-dot');
+const scoreEl = document.getElementById('score');
+
+let W, H;
+function resize() {
+  W = gameCanvas.width = gameCanvas.offsetWidth;
+  H = gameCanvas.height = gameCanvas.offsetHeight;
+  handOverlay.width = handOverlay.offsetWidth;
+  handOverlay.height = handOverlay.offsetHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// ===================== GESTURE DETECTION =====================
+// gestures object with independent booleans so combos work
+let gestures = { left: false, right: false, jump: false };
+let gesture = 'none'; // for display label only
+
+function detectGesture(lm) {
+  if (!lm || lm.length === 0) return { left: false, right: false, jump: false };
+  const wrist = lm[0];
+  const thumbTip = lm[4], thumbIP = lm[3], thumbMCP = lm[2];
+  const indexTip = lm[8], middleTip = lm[12], ringTip = lm[16], pinkyTip = lm[20];
+  const indexMCP = lm[5], middleMCP = lm[9], ringMCP = lm[13], pinkyMCP = lm[17];
+
+  // Palm size = distance from wrist to middle MCP, used to normalize
+  const palmSize = Math.hypot(wrist.x - middleMCP.x, wrist.y - middleMCP.y);
+
+  // Finger extended: tip clearly above its MCP (y-axis, normalized)
+  const indexExt  = indexTip.y  < indexMCP.y  - 0.04;
+  const middleExt = middleTip.y < middleMCP.y - 0.04;
+  const ringExt   = ringTip.y   < ringMCP.y   - 0.04;
+  const pinkyExt  = pinkyTip.y  < pinkyMCP.y  - 0.04;
+
+  // Thumb abducted sideways: compare x-distance from thumb tip to pinky MCP.
+  // When thumb is tucked in, thumbTip.x is close to the other fingers.
+  // When thumb sticks out sideways, it moves away in x.
+  // We use the hand width (pinkyMCP to indexMCP in x) to normalize.
+  const handWidth = Math.abs(indexMCP.x - pinkyMCP.x);
+  const thumbSpread = Math.abs(thumbTip.x - pinkyMCP.x); // how far thumb is from far edge
+  // Thumb is "out" when it extends well beyond the index finger side
+  const thumbOut = thumbSpread > handWidth * 1.6;
+
+  // POINT: index up, others curled = walk left
+  const goLeft  = indexExt && !middleExt && !ringExt && !pinkyExt;
+  // PINKY UP: pinky up, others curled = walk right
+  const goRight = pinkyExt && !indexExt && !middleExt && !ringExt;
+  // THUMB OUT: jump — thumb tip far beyond index side of hand
+  const doJump  = thumbOut;
+  return { left: goLeft, right: goRight, jump: doJump,
+           _dbgSpread: Math.round(thumbSpread * 1000), _dbgWidth: Math.round(handWidth * 1000), _dbgThreshPct: Math.round(thumbSpread / (handWidth || 0.001) * 100) };
+}
+
+// ===================== MEDIAPIPE =====================
+let handsModel;
+async function initMediaPipe() {
+  handsModel = new Hands({ locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
+  handsModel.setOptions({ maxNumHands: 1, modelComplexity: 1, minDetectionConfidence: 0.7, minTrackingConfidence: 0.6 });
+  handsModel.onResults(onHandResults);
+  const camera = new Camera(video, {
+    onFrame: async () => { if (handsModel) await handsModel.send({ image: video }); },
+    width: 320, height: 240
+  });
+  camera.start();
+}
+
+function onHandResults(results) {
+  hctx.clearRect(0, 0, handOverlay.width, handOverlay.height);
+  if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+    const lm = results.multiHandLandmarks[0];
+    gestures = detectGesture(lm);
+    // Build display label
+    const parts = [];
+    if (gestures.left) parts.push('LEFT');
+    if (gestures.right) parts.push('RIGHT');
+    if (gestures.jump) parts.push('JUMP');
+    gesture = parts.length ? parts.join('+') : 'IDLE';
+    // Debug: show thumb spread ratio in status text
+    const ratio = gestures._dbgThreshPct || 0;
+    gestureText.textContent = gesture + '  [thumb ' + ratio + '% / need 160%]';
+    statusDot.className = 'active';
+    gestureText.textContent = gesture;
+    drawHandSkeleton(lm);
+  } else {
+    gestures = { left: false, right: false, jump: false };
+    gesture = 'none';
+    statusDot.className = '';
+    gestureText.textContent = 'no hand detected';
+  }
+}
+
+function drawHandSkeleton(lm) {
+  const hw = handOverlay.width, hh = handOverlay.height;
+  const conn = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[0,9],[9,10],[10,11],[11,12],
+    [0,13],[13,14],[14,15],[15,16],[0,17],[17,18],[18,19],[19,20],[5,9],[9,13],[13,17]];
+  hctx.strokeStyle = 'rgba(124,106,247,0.75)';
+  hctx.lineWidth = 1.5;
+  for (const [a,b] of conn) {
+    hctx.beginPath();
+    hctx.moveTo((1-lm[a].x)*hw, lm[a].y*hh);
+    hctx.lineTo((1-lm[b].x)*hw, lm[b].y*hh);
+    hctx.stroke();
+  }
+  for (let i = 0; i < lm.length; i++) {
+    hctx.beginPath();
+    hctx.arc((1-lm[i].x)*hw, lm[i].y*hh, i===0?4:2.5, 0, Math.PI*2);
+    hctx.fillStyle = i===0 ? '#7c6af7' : 'rgba(168,156,247,0.9)';
+    hctx.fill();
+  }
+}
+
+// ===================== WORLD / LEVEL =====================
+// World coords: x increases rightward, y increases downward, ground at worldGroundY
+const WORLD_GROUND_Y = 600;
+const WALK_SPEED = 3;
+const GRAVITY = 0.55;
+const JUMP_VY = -13;
+const INVINCIBLE_MS = 1200; // grace period after hit
+
+// Camera
+let camX = 0; // world x shown at left edge of screen
+
+// Player
+const fig = {
+  wx: 300,   // world x (center)
+  wy: WORLD_GROUND_Y, // world y (feet)
+  vx: 0,
+  vy: 0,
+  onGround: false,
+  onPlatform: null,
+  state: 'idle',
+  frame: 0,
+  dir: 1,
+  trail: [],
+  health: 10,
+  invincibleUntil: 0,
+  dead: false
+};
+
+// ---- BUILD LEVEL ----
+// Static level objects in world coords
+const platforms = [
+  { x: 500,  y: WORLD_GROUND_Y - 120, w: 160, h: 18 },
+  { x: 750,  y: WORLD_GROUND_Y - 200, w: 120, h: 18 },
+  { x: 950,  y: WORLD_GROUND_Y - 140, w: 200, h: 18 },
+  { x: 1250, y: WORLD_GROUND_Y - 180, w: 140, h: 18 },
+  { x: 1500, y: WORLD_GROUND_Y - 120, w: 100, h: 18 },
+  { x: 1700, y: WORLD_GROUND_Y - 240, w: 180, h: 18 },
+  { x: 2000, y: WORLD_GROUND_Y - 160, w: 140, h: 18 },
+  { x: 2200, y: WORLD_GROUND_Y - 100, w: 120, h: 18 },
+  { x: 400,  y: WORLD_GROUND_Y - 280, w: 100, h: 18 },
+  { x: 1100, y: WORLD_GROUND_Y - 300, w: 120, h: 18 },
+];
+
+// Static obstacles: spikes + cacti = damage, walls = block
+const obstacles = [
+  { x: 650,  type: 'spike',  w: 28, h: 36 },
+  { x: 820,  type: 'cactus', w: 22, h: 52 },
+  { x: 1050, type: 'spike',  w: 28, h: 36 },
+  { x: 1400, type: 'cactus', w: 22, h: 52 },
+  { x: 1600, type: 'spike',  w: 28, h: 36 },
+  { x: 1900, type: 'spike',  w: 28, h: 36 },
+  { x: 2100, type: 'cactus', w: 22, h: 52 },
+  { x: 700,  type: 'spike',  w: 28, h: 36 },
+  { x: 850,  type: 'cactus', w: 22, h: 52 },
+];
+
+// Precompute obstacle feet-y
+obstacles.forEach(o => {
+  o.groundY = WORLD_GROUND_Y; // all sit on ground
+  o.top = WORLD_GROUND_Y - o.h;
+});
+
+// Coins placed near platforms and ground
+const coins = [];
+function placeCoin(wx, wy) { coins.push({ wx, wy, r: 8, collected: false }); }
+placeCoin(560, WORLD_GROUND_Y - 30);
+placeCoin(530, WORLD_GROUND_Y - 140);
+placeCoin(570, WORLD_GROUND_Y - 140);
+placeCoin(800, WORLD_GROUND_Y - 220);
+placeCoin(840, WORLD_GROUND_Y - 220);
+placeCoin(1000, WORLD_GROUND_Y - 160);
+placeCoin(1060, WORLD_GROUND_Y - 160);
+placeCoin(1300, WORLD_GROUND_Y - 200);
+placeCoin(1340, WORLD_GROUND_Y - 200);
+placeCoin(1530, WORLD_GROUND_Y - 140);
+placeCoin(1750, WORLD_GROUND_Y - 260);
+placeCoin(1800, WORLD_GROUND_Y - 260);
+placeCoin(2050, WORLD_GROUND_Y - 180);
+placeCoin(450, WORLD_GROUND_Y - 300);
+placeCoin(1150, WORLD_GROUND_Y - 320);
+
+let particles = [];
+let score = 0;
+let gameRunning = false;
+let lastTime = 0;
+let hitFlash = 0;
+
+// Stars (fixed in screen space for simple parallax feel, but don't scroll much)
+const bgStars = Array.from({length:55}, () => ({
+  rx: Math.random(), ry: Math.random()*0.55,
+  r: Math.random()*1.4+0.3, parallax: 0.05 + Math.random()*0.1
+}));
+
+// ===================== UPDATE =====================
+function update(dt) {
+  if (fig.dead) return;
+  const now = performance.now();
+
+  // Horizontal movement
+  let dx = 0;
+  if (gestures.right) { dx = WALK_SPEED; fig.dir = 1; }
+  else if (gestures.left) { dx = -WALK_SPEED; fig.dir = -1; }
+
+  // Clamp to world bounds
+  const newWX = fig.wx + dx;
+  const figW = 12; // half-width for collision
+  fig.wx = Math.max(figW, newWX);
+
+  // Jump
+  if (gestures.jump && (fig.onGround || fig.onPlatform)) {
+    fig.vy = JUMP_VY;
+    fig.onGround = false;
+    fig.onPlatform = null;
+    spawnParticles(fig.wx, fig.wy, '#7c6af7', 10);
+  }
+
+  // Gravity
+  fig.vy += GRAVITY;
+  fig.wy += fig.vy;
+  fig.onGround = false;
+  fig.onPlatform = null;
+
+  // Ground collision
+  if (fig.wy >= WORLD_GROUND_Y) {
+    fig.wy = WORLD_GROUND_Y;
+    fig.vy = 0;
+    fig.onGround = true;
+  }
+
+  // Platform collision (land on top only, coming down)
+  for (const p of platforms) {
+    const px1 = p.x, px2 = p.x + p.w;
+    const py = p.y;
+    if (fig.wx + figW > px1 && fig.wx - figW < px2) {
+      // Landing from above
+      if (fig.wy >= py && fig.wy - fig.vy <= py + 2 && fig.vy >= 0) {
+        fig.wy = py;
+        fig.vy = 0;
+        fig.onPlatform = p;
+      }
+    }
+  }
+
+
+  // Damage collision (spikes & cacti)
+  if (now > fig.invincibleUntil) {
+    for (const o of obstacles) {
+      const ox1 = o.x - o.w/2, ox2 = o.x + o.w/2;
+      const oy1 = o.floatY !== undefined ? o.floatY - o.h : o.top;
+      const oy2 = o.floatY !== undefined ? o.floatY : WORLD_GROUND_Y;
+      if (fig.wx + 10 > ox1 && fig.wx - 10 < ox2 && fig.wy >= oy1 - 5 && fig.wy <= oy2 + 5) {
+        fig.health = Math.max(0, fig.health - 1);
+        fig.invincibleUntil = now + INVINCIBLE_MS;
+        hitFlash = 300;
+        spawnParticles(fig.wx, fig.wy - 30, '#ef233c', 14);
+        if (fig.health <= 0) { fig.dead = true; }
+        break;
+      }
+    }
+  }
+
+  // Coin collection
+  for (const c of coins) {
+    if (c.collected) continue;
+    const dist = Math.hypot(fig.wx - c.wx, fig.wy - c.wy);
+    if (dist < 22) {
+      c.collected = true;
+      score++;
+      scoreEl.textContent = score;
+      spawnParticles(c.wx, c.wy, '#facc15', 12);
+    }
+  }
+
+  // Figure state
+  if (!fig.onGround && !fig.onPlatform) fig.state = 'jump';
+  else if (dx !== 0) fig.state = 'walk';
+  else fig.state = 'idle';
+  // Trail only when walking
+
+
+  fig.frame += (fig.state === 'walk' ? 0.15 : 0.08);
+
+  // Trail
+  if (dx !== 0) {
+    fig.trail.push({ x: fig.wx, y: fig.wy, a: 0.35 });
+    if (fig.trail.length > 7) fig.trail.shift();
+    fig.trail.forEach(t => t.a *= 0.82);
+  } else { fig.trail = []; }
+
+  // Camera: keep fig horizontally centered-ish with a deadzone
+  const targetCamX = fig.wx - W * 0.4;
+  camX += (targetCamX - camX) * 0.1;
+  camX = Math.max(0, camX);
+
+  // Particles
+  particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += 0.15; p.life -= p.decay; });
+  particles = particles.filter(p => p.life > 0);
+
+  if (hitFlash > 0) hitFlash -= dt;
+}
+
+// ===================== PARTICLES =====================
+function spawnParticles(x, y, color, count=8) {
+  for (let i = 0; i < count; i++) {
+    const a = Math.random() * Math.PI * 2, spd = 1.5 + Math.random() * 3;
+    particles.push({ x, y, vx: Math.cos(a)*spd, vy: Math.sin(a)*spd - 2,
+      life: 1, decay: 0.04 + Math.random()*0.03, r: 2+Math.random()*3, color });
+  }
+}
+
+// ===================== DRAW HELPERS =====================
+function wx2sx(wx) { return wx - camX; } // world x → screen x
+function wy2sy(wy) { // world y → screen y; ground at H - 60
+  const screenGround = H - 60;
+  return screenGround - (WORLD_GROUND_Y - wy);
+}
+
+// ===================== DRAW =====================
+function drawBackground() {
+  ctx.fillStyle = '#0a0a0f';
+  ctx.fillRect(0, 0, W, H);
+
+  // Stars (slow parallax)
+  bgStars.forEach(s => {
+    const sx = ((s.rx * W * 3 - camX * s.parallax) % (W * 3) + W * 3) % (W * 3);
+    if (sx < W + 10) {
+      ctx.beginPath();
+      ctx.arc(sx, s.ry * H, s.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(200,200,255,${0.25 + s.r * 0.15})`;
+      ctx.fill();
+    }
+  });
+
+  // Perspective grid
+  const screenGround = H - 60;
+  ctx.strokeStyle = 'rgba(124,106,247,0.05)';
+  ctx.lineWidth = 1;
+  const gridW = 80;
+  const offX = camX % gridW;
+  for (let x = -offX; x < W + gridW; x += gridW) {
+    ctx.beginPath(); ctx.moveTo(x, screenGround * 0.4); ctx.lineTo(x, screenGround); ctx.stroke();
+  }
+  for (let y = screenGround * 0.4; y < screenGround; y += 50) {
+    const a = (y - screenGround*0.4) / (screenGround*0.6) * 0.06;
+    ctx.strokeStyle = `rgba(124,106,247,${a})`;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+}
+
+function drawGround() {
+  const sy = wy2sy(WORLD_GROUND_Y);
+  // Glow
+  const grad = ctx.createLinearGradient(0, sy-1, 0, sy+20);
+  grad.addColorStop(0, 'rgba(124,106,247,0.55)');
+  grad.addColorStop(1, 'rgba(124,106,247,0)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, sy, W, 22);
+  ctx.strokeStyle = 'rgba(124,106,247,0.8)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(0, sy); ctx.lineTo(W, sy); ctx.stroke();
+  // Tiles
+  const tileW = 60, offX = camX % tileW;
+  ctx.strokeStyle = 'rgba(124,106,247,0.13)'; ctx.lineWidth = 1;
+  for (let x = -offX; x < W; x += tileW) {
+    ctx.beginPath(); ctx.moveTo(x, sy); ctx.lineTo(x, sy+18); ctx.stroke();
+  }
+}
+
+function drawPlatforms() {
+  for (const p of platforms) {
+    const sx = wx2sx(p.x), sy = wy2sy(p.y), sw = p.w;
+    // Only draw if on screen
+    if (sx + sw < -10 || sx > W + 10) continue;
+    const pHover = isHovered(p);
+    // Surface glow
+    const grad = ctx.createLinearGradient(0, sy, 0, sy + p.h + 8);
+    grad.addColorStop(0, pHover ? 'rgba(168,156,247,0.8)' : 'rgba(124,106,247,0.5)');
+    grad.addColorStop(1, 'rgba(124,106,247,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(sx, sy, sw, p.h + 8);
+    // Platform body
+    ctx.fillStyle = pHover ? 'rgba(60,45,120,0.95)' : 'rgba(40,30,80,0.85)';
+    ctx.strokeStyle = pHover ? 'rgba(200,190,255,0.9)' : 'rgba(124,106,247,0.7)';
+    ctx.lineWidth = pHover ? 2 : 1.5;
+    ctx.beginPath();
+    ctx.roundRect(sx, sy, sw, p.h, 4);
+    ctx.fill(); ctx.stroke();
+    // Top highlight
+    ctx.strokeStyle = 'rgba(168,156,247,0.5)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(sx+4, sy+1); ctx.lineTo(sx+sw-4, sy+1); ctx.stroke();
+  }
+}
+
+function drawObstacles() {
+  for (const o of obstacles) {
+    const sx = wx2sx(o.x);
+    if (sx < -60 || sx > W + 60) continue;
+    const groundSY = wy2sy(WORLD_GROUND_Y);
+    const topSY = groundSY - o.h;
+    const oHover = isHovered(o);
+    if (oHover) { ctx.save(); ctx.shadowColor = '#a89cf7'; ctx.shadowBlur = 12; }
+
+    if (o.type === 'cactus') {
+      ctx.fillStyle = '#2d6a4f';
+      ctx.strokeStyle = '#52b788';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(sx - o.w/2, topSY, o.w, o.h, 4);
+      ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.roundRect(sx - o.w/2 - 12, topSY + o.h*0.3, 12, 8, 3); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.roundRect(sx + o.w/2, topSY + o.h*0.45, 12, 8, 3); ctx.fill(); ctx.stroke();
+    } else if (o.type === 'spike') {
+      // Support floating spikes (floatY set) or ground spikes
+      const spikeBottomSY = o.floatY !== undefined ? wy2sy(o.floatY) : groundSY;
+      const spikeTopSY = spikeBottomSY - o.h;
+      ctx.fillStyle = '#c1121f';
+      ctx.strokeStyle = '#e63946';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(sx, spikeTopSY);
+      ctx.lineTo(sx + o.w/2, spikeBottomSY);
+      ctx.lineTo(sx - o.w/2, spikeBottomSY);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+    }
+    if (oHover) ctx.restore();
+  }
+}
+
+function drawCoins() {
+  const now = Date.now();
+  for (const c of coins) {
+    if (c.collected) continue;
+    const sx = wx2sx(c.wx), sy = wy2sy(c.wy);
+    if (sx < -20 || sx > W+20) continue;
+    const pulse = Math.sin(now*0.005 + c.wx*0.05) * 0.12 + 0.88;
+    ctx.beginPath();
+    ctx.arc(sx, sy, c.r * pulse, 0, Math.PI*2);
+    ctx.fillStyle = '#facc15';
+    ctx.strokeStyle = '#fbbf24';
+    ctx.lineWidth = 1.5;
+    ctx.fill(); ctx.stroke();
+    // shine
+    ctx.beginPath();
+    ctx.arc(sx - 2, sy - 2, c.r * pulse * 0.35, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.fill();
+  }
+}
+
+function drawParticles() {
+  for (const p of particles) {
+    ctx.save();
+    ctx.globalAlpha = p.life;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r * p.life, 0, Math.PI*2);
+    ctx.fillStyle = p.color; ctx.fill();
+    ctx.restore();
+  }
+}
+
+function drawHealthBar() {
+  const maxHP = 10, hp = fig.health;
+  const barW = 160, barH = 10;
+  const bx = 20, by = 16;
+  // Label
+  ctx.font = '10px Courier New';
+  ctx.fillStyle = '#888';
+  ctx.fillText('HP', bx, by - 3);
+  // Background
+  ctx.fillStyle = 'rgba(255,255,255,0.08)';
+  ctx.beginPath(); ctx.roundRect(bx + 22, by - 9, barW, barH, 3); ctx.fill();
+  // Fill
+  const frac = hp / maxHP;
+  const barColor = frac > 0.5 ? '#4afa9a' : frac > 0.25 ? '#facc15' : '#ef233c';
+  ctx.fillStyle = barColor;
+  ctx.beginPath(); ctx.roundRect(bx + 22, by - 9, barW * frac, barH, 3); ctx.fill();
+  // Border
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.roundRect(bx + 22, by - 9, barW, barH, 3); ctx.stroke();
+  // Heart pips
+  for (let i = 0; i < maxHP; i++) {
+    const px = bx + 22 + (barW / maxHP) * (i + 0.5);
+    ctx.strokeStyle = 'rgba(0,0,0,0.2)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(px, by - 9); ctx.lineTo(px, by + 1); ctx.stroke();
+  }
+}
+
+function drawGestureHint() {
+  const hints = [
+    { label: 'POINT',    desc: 'walk left',  active: gestures.left },
+    { label: 'PINKY',    desc: 'walk right', active: gestures.right },
+    { label: 'THUMB',    desc: 'jump',       active: gestures.jump },
+  ];
+  const padX = 16, padY = 12, gapX = 12;
+  const bw = 110, bh = 44;
+  const totalW = hints.length * bw + (hints.length - 1) * gapX;
+  let startX = W/2 - totalW/2;
+  const startY = 12;
+
+  hints.forEach(h => {
+    ctx.save();
+    // Background pill
+    ctx.globalAlpha = h.active ? 0.95 : 0.45;
+    ctx.fillStyle = h.active ? 'rgba(124,106,247,0.35)' : 'rgba(20,18,35,0.7)';
+    ctx.beginPath(); ctx.roundRect(startX, startY, bw, bh, 8); ctx.fill();
+    // Border
+    ctx.strokeStyle = h.active ? '#a89cf7' : 'rgba(255,255,255,0.1)';
+    ctx.lineWidth = h.active ? 1.5 : 1;
+    ctx.beginPath(); ctx.roundRect(startX, startY, bw, bh, 8); ctx.stroke();
+    ctx.globalAlpha = 1;
+    // Label (gesture name)
+    ctx.font = `${h.active ? '600' : '500'} 13px Courier New`;
+    ctx.fillStyle = h.active ? '#e0d8ff' : '#666';
+    ctx.textAlign = 'center';
+    ctx.fillText(h.label, startX + bw/2, startY + 18);
+    // Description
+    ctx.font = '10px Courier New';
+    ctx.fillStyle = h.active ? '#a89cf7' : '#444';
+    ctx.fillText(h.desc, startX + bw/2, startY + 33);
+    ctx.textAlign = 'left';
+    ctx.restore();
+    startX += bw + gapX;
+  });
+}
+
+function drawDeadScreen() {
+  ctx.fillStyle = 'rgba(0,0,0,0.6)';
+  ctx.fillRect(0, 0, W, H);
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 36px Courier New';
+  ctx.fillStyle = '#ef233c';
+  ctx.fillText('YOU DIED', W/2, H/2 - 30);
+  ctx.font = '16px Courier New';
+  ctx.fillStyle = '#888';
+  ctx.fillText(`Coins collected: ${score}`, W/2, H/2 + 10);
+  ctx.font = '13px Courier New';
+  ctx.fillStyle = '#555';
+  ctx.fillText('Refresh to play again', W/2, H/2 + 40);
+  ctx.textAlign = 'left';
+}
+
+// ===================== STICK FIGURE =====================
+function drawStickFigure() {
+  if (fig.dead) return;
+  const now = performance.now();
+  const sx = wx2sx(fig.wx), sy = wy2sy(fig.wy);
+  const isCrouch = false;
+  const isJump = fig.state === 'jump';
+  const isWalk = fig.state === 'walk';
+  const t = fig.frame;
+
+  // Trail
+  for (const tr of fig.trail) {
+    ctx.save();
+    ctx.globalAlpha = tr.a * 0.45;
+    ctx.strokeStyle = '#7c6af7'; ctx.lineWidth = 1;
+    drawFigureSkeleton(wx2sx(tr.x), wy2sy(tr.y), t, isCrouch, isJump, isWalk, fig.dir, true);
+    ctx.restore();
+  }
+
+  ctx.save();
+  // Invincibility flicker
+  if (now < fig.invincibleUntil && Math.floor(now / 80) % 2 === 0) {
+    ctx.globalAlpha = 0.35;
+  }
+  // Hit flash overlay
+  if (hitFlash > 0) {
+    ctx.shadowColor = '#ef233c';
+    ctx.shadowBlur = 18;
+  } else {
+    ctx.shadowColor = '#7c6af7';
+    ctx.shadowBlur = 8;
+  }
+  ctx.strokeStyle = hitFlash > 0 ? '#ff6b6b' : '#e8e8f0';
+  ctx.lineWidth = 2.2;
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  drawFigureSkeleton(sx, sy, t, isCrouch, isJump, isWalk, fig.dir, false);
+  ctx.restore();
+}
+
+function drawFigureSkeleton(sx, sy, t, crouch, jump, walk, dir, ghost) {
+  const headY = crouch ? sy - 28 : sy - 55;
+  const bodyBottom = crouch ? sy - 10 : sy - 25;
+  const headR = 9;
+
+  ctx.beginPath(); ctx.arc(sx, headY, headR, 0, Math.PI*2); ctx.stroke();
+  if (!ghost) {
+    ctx.beginPath(); ctx.arc(sx + dir*3, headY, 1.5, 0, Math.PI*2);
+    ctx.fillStyle = '#e8e8f0'; ctx.fill();
+  }
+  const bodyTop = headY + headR + 2;
+  ctx.beginPath(); ctx.moveTo(sx, bodyTop); ctx.lineTo(sx, bodyBottom); ctx.stroke();
+
+  // Arms
+  let lA, rA;
+  if (walk) { lA = Math.sin(t*2)*0.8; rA = -Math.sin(t*2)*0.8; }
+  else if (jump) { lA = -1.0; rA = -1.0; }
+  else if (crouch) { lA = 0.5; rA = 0.5; }
+  else { lA = Math.sin(t)*0.4; rA = -Math.sin(t)*0.4; }
+
+  const midY = bodyTop + (bodyBottom - bodyTop) * 0.35;
+  const aL = 11;
+  const e1x = sx - Math.cos(lA + Math.PI/2)*aL, e1y = midY + Math.sin(lA + Math.PI/2)*aL;
+  const h1x = e1x - Math.cos(lA + Math.PI/2)*aL, h1y = e1y + Math.sin(lA + Math.PI/2)*aL;
+  const e2x = sx + Math.cos(rA + Math.PI/2)*aL, e2y = midY + Math.sin(rA + Math.PI/2)*aL;
+  const h2x = e2x + Math.cos(rA + Math.PI/2)*aL, h2y = e2y + Math.sin(rA + Math.PI/2)*aL;
+
+  ctx.beginPath(); ctx.moveTo(sx, midY); ctx.lineTo(e1x, e1y); ctx.lineTo(h1x, h1y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(sx, midY); ctx.lineTo(e2x, e2y); ctx.lineTo(h2x, h2y); ctx.stroke();
+
+  // Legs
+  let lL, rL;
+  const legL = crouch ? 8 : 20;
+  if (walk) { lL = Math.sin(t*2)*0.75; rL = -Math.sin(t*2)*0.75; }
+  else if (jump) { lL = -0.5; rL = 0.5; }
+  else if (crouch) { lL = 0.65; rL = -0.65; }
+  else { lL = 0; rL = 0; }
+
+  const hip = bodyBottom, ll2 = legL * 0.55;
+  const k1x = sx + Math.sin(lL)*ll2, k1y = hip + Math.cos(lL)*ll2;
+  const f1x = k1x + Math.sin(lL*0.5+0.3)*ll2, f1y = k1y + Math.cos(lL*0.5+0.3)*ll2;
+  const k2x = sx + Math.sin(rL)*ll2, k2y = hip + Math.cos(rL)*ll2;
+  const f2x = k2x + Math.sin(rL*0.5-0.3)*ll2, f2y = k2y + Math.cos(rL*0.5-0.3)*ll2;
+
+  ctx.beginPath(); ctx.moveTo(sx, hip); ctx.lineTo(k1x, k1y); ctx.lineTo(f1x, f1y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(sx, hip); ctx.lineTo(k2x, k2y); ctx.lineTo(f2x, f2y); ctx.stroke();
+}
+
+// ===================== GAME LOOP =====================
+function drawLoop(now) {
+  if (!gameRunning) return;
+  const dt = now - lastTime;
+  lastTime = now;
+  resize();
+  update(dt);
+
+  drawBackground();
+  drawGround();
+  drawPlatforms();
+  drawObstacles();
+  drawCoins();
+  drawParticles();
+  drawStickFigure();
+  drawHealthBar();
+  drawGestureHint();
+  if (fig.dead) drawDeadScreen();
+
+  requestAnimationFrame(drawLoop);
+}
+
+
+// ===================== LEVEL EDITOR DRAG =====================
+let dragTarget = null;  // { obj, type, offWX, offWY }
+let hoveredObj = null;
+
+// Convert screen coords to world coords
+function sx2wx(sx) { return sx + camX; }
+function sy2wy(sy) {
+  const screenGround = H - 60;
+  return WORLD_GROUND_Y - (screenGround - sy);
+}
+
+function hitTestObstacle(o, mx, my) {
+  const groundSY = wy2sy(WORLD_GROUND_Y);
+  const topSY = groundSY - o.h;
+  const sx = wx2sx(o.x);
+  const pad = 10;
+  return mx >= sx - o.w/2 - pad && mx <= sx + o.w/2 + pad &&
+         my >= topSY - pad && my <= groundSY + pad;
+}
+
+function hitTestPlatform(p, mx, my) {
+  const sx = wx2sx(p.x), sy = wy2sy(p.y);
+  const pad = 10;
+  return mx >= sx - pad && mx <= sx + p.w + pad &&
+         my >= sy - pad && my <= sy + p.h + pad;
+}
+
+function hitTestCoin(c, mx, my) {
+  if (c.collected) return false;
+  const sx = wx2sx(c.wx), sy = wy2sy(c.wy);
+  return Math.hypot(mx - sx, my - sy) < 16;
+}
+
+function getObjectAtScreen(mx, my) {
+  // Check coins first (smallest)
+  for (const c of coins) {
+    if (hitTestCoin(c, mx, my)) return { obj: c, type: 'coin' };
+  }
+  // Obstacles
+  for (const o of obstacles) {
+    if (hitTestObstacle(o, mx, my)) return { obj: o, type: 'obstacle' };
+  }
+  // Platforms
+  for (const p of platforms) {
+    if (hitTestPlatform(p, mx, my)) return { obj: p, type: 'platform' };
+  }
+  return null;
+}
+
+function initLevelEditor() {
+  gameCanvas.addEventListener('mousedown', e => {
+    if (e.button !== 0) return;
+    const rect = gameCanvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    const hit = getObjectAtScreen(mx, my);
+    if (!hit) return;
+    e.preventDefault();
+    dragTarget = hit;
+    // Store offset from object center to mouse in world coords
+    const wMX = sx2wx(mx), wMY = sy2wy(my);
+    if (hit.type === 'obstacle') {
+      dragTarget.offWX = hit.obj.x - wMX;
+      dragTarget.offWY = 0; // obstacles snap to ground
+    } else if (hit.type === 'platform') {
+      dragTarget.offWX = hit.obj.x - wMX;
+      dragTarget.offWY = hit.obj.y - wMY;
+    } else if (hit.type === 'coin') {
+      dragTarget.offWX = hit.obj.wx - wMX;
+      dragTarget.offWY = hit.obj.wy - wMY;
+    }
+    gameCanvas.style.cursor = 'grabbing';
+  });
+
+  window.addEventListener('mousemove', e => {
+    const rect = gameCanvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+
+    if (dragTarget) {
+      const wMX = sx2wx(mx), wMY = sy2wy(my);
+      if (dragTarget.type === 'obstacle') {
+        dragTarget.obj.x = wMX + dragTarget.offWX;
+        // Recompute top
+        dragTarget.obj.top = WORLD_GROUND_Y - dragTarget.obj.h;
+      } else if (dragTarget.type === 'platform') {
+        dragTarget.obj.x = wMX + dragTarget.offWX;
+        dragTarget.obj.y = wMY + dragTarget.offWY;
+        // Clamp above ground
+        dragTarget.obj.y = Math.min(WORLD_GROUND_Y - dragTarget.obj.h - 10, dragTarget.obj.y);
+      } else if (dragTarget.type === 'coin') {
+        dragTarget.obj.wx = wMX + dragTarget.offWX;
+        dragTarget.obj.wy = wMY + dragTarget.offWY;
+      }
+    } else {
+      // Hover highlight
+      const hit = getObjectAtScreen(mx, my);
+      hoveredObj = hit ? hit.obj : null;
+      gameCanvas.style.cursor = hit ? 'grab' : 'crosshair';
+    }
+  });
+
+  window.addEventListener('mouseup', e => {
+    if (dragTarget) {
+      dragTarget = null;
+      gameCanvas.style.cursor = 'grab';
+    }
+  });
+}
+
+// Highlight hovered/dragged object in draw calls
+function isHovered(obj) {
+  return hoveredObj === obj || (dragTarget && dragTarget.obj === obj);
+}
+
+
+// ===================== SPAWN ELEMENTS =====================
+function spawnElement(type) {
+  // Spawn ahead of player in the direction they're facing
+  const dir = fig.dir; // 1 = right, -1 = left
+  const dist = 200 + Math.random() * 300; // 200-500 px ahead
+  const spawnWX = fig.wx + dir * dist;
+
+  if (type === 'platform') {
+    const w = 100 + Math.random() * 120;
+    const minH = 80, maxH = 280;
+    const platformY = WORLD_GROUND_Y - (minH + Math.random() * (maxH - minH));
+    platforms.push({ x: spawnWX - w/2, y: platformY, w, h: 18 });
+
+  } else if (type === 'cactus') {
+    const h = 40 + Math.random() * 25;
+    const o = { x: spawnWX, type: 'cactus', w: 22, h };
+    o.groundY = WORLD_GROUND_Y; o.top = WORLD_GROUND_Y - h;
+    obstacles.push(o);
+
+  } else if (type === 'spike') {
+    // Spike floats randomly in the air — on a platform if any nearby, otherwise mid-air
+    const floatY = WORLD_GROUND_Y - (120 + Math.random() * 200);
+    const o = { x: spawnWX, type: 'spike', w: 28, h: 36 };
+    // For floating spikes we override groundY so it renders mid-air
+    o.floatY = floatY; // store custom Y
+    o.groundY = WORLD_GROUND_Y; o.top = WORLD_GROUND_Y - o.h;
+    obstacles.push(o);
+  }
+}
+
+async function startGame() {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('spawn-bar').style.display = 'flex';
+  gameRunning = true;
+  fig.wy = WORLD_GROUND_Y;
+  fig.wx = 450; // safe spawn, first hazards are at x=650+
+  camX = 0;
+  await initMediaPipe();
+  initLevelEditor();
+  lastTime = performance.now();
+  requestAnimationFrame(drawLoop);
+}
+
+</script>
+</body>
+</html>
