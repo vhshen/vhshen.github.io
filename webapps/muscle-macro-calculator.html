@@ -209,7 +209,7 @@
       <button class="goal-btn active" data-goal="bulk" onclick="setGoal('bulk')">
         <span class="goal-icon">↑</span>
         <span class="goal-name">Lean Bulk</span>
-        <span class="goal-desc">+250 kcal surplus. Build muscle, accept minimal fat gain.</span>
+        <span class="goal-desc">+125 kcal surplus. Build muscle slowly, minimize fat gain.</span>
       </button>
       <button class="goal-btn" data-goal="recomp" onclick="setGoal('recomp')">
         <span class="goal-icon">⟳</span>
@@ -219,7 +219,7 @@
       <button class="goal-btn" data-goal="cut" onclick="setGoal('cut')">
         <span class="goal-icon">↓</span>
         <span class="goal-name">Cut</span>
-        <span class="goal-desc">−400 kcal deficit. Lose fat, preserve muscle with high protein.</span>
+        <span class="goal-desc">−300 kcal deficit. Lose fat slowly, maximize muscle retention.</span>
       </button>
     </div>
   </div>
@@ -370,7 +370,7 @@
   const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 
   const ACTIVITY_TYPES = [
-    { key: 'lowcardio',  label: 'Low cardio',  weight: 0.5  },
+    { key: 'lowcardio',  label: 'Mobility/Z2', weight: 0.3  },
     { key: 'highcardio', label: 'High cardio', weight: 0.85 },
     { key: 'hiit',       label: 'HIIT',        weight: 1.0  },
     { key: 'strength',   label: 'Strength',    weight: 0.75 },
@@ -380,13 +380,13 @@
   // Goal configs: calorie offset, protein g/lb, label, description, footnote
   const GOALS = {
     bulk: {
-      offset: +250,
+      offset: +125,
       protPerLb: 0.9,
       tagLabel: 'Lean Bulk',
       targetLabel: 'Target daily calories — lean bulk',
-      surplusNote: '+250 kcal surplus above TDEE',
-      bannerText: 'Lean bulk: eat 250 kcal above maintenance to fuel muscle growth while minimizing fat gain. Expect +0.5–1 lb/week. If gaining faster, drop 150 kcal. Stalled? Add 150 kcal.',
-      footnote: 'Lean bulk surplus +250 kcal (ISSN 2017 position stand). Protein at 0.9 g/lb bodyweight (Morton meta-analysis 2018; ISSN range 0.7–1.0 g/lb). Fat 22% for hormonal health. Carbs fill the remainder — primary fuel for glycogen and muscle recovery (ACSM).',
+      surplusNote: '+125 kcal surplus above TDEE (~0.25 lb/week gain)',
+      bannerText: 'Lean bulk: eat 125 kcal above maintenance — enough to fuel muscle growth while minimizing fat gain. This targets +0.25 lb/week, a conservative rate that keeps gains lean. If gaining faster than 0.5 lb/week, drop 100 kcal. Stalled for 2+ weeks? Add 100 kcal.',
+      footnote: 'Lean bulk surplus +125 kcal/day (~0.25 lb/week), conservative end of ISSN 2017 range (125–250 kcal). Slower surplus means more of the gain is muscle, not fat. Protein at 0.9 g/lb bodyweight (Morton meta-analysis 2018). Fat 22% for hormonal health. Carbs fill the remainder (ACSM).',
     },
     recomp: {
       offset: 0,
@@ -398,13 +398,13 @@
       footnote: 'Recomp targets TDEE (no surplus/deficit). Protein elevated to 1.1 g/lb bodyweight (Barakat et al. 2020 meta-analysis on concurrent fat loss and muscle gain). Fat 22% for hormonal health. Carbs fill the remainder.',
     },
     cut: {
-      offset: -400,
+      offset: -300,
       protPerLb: 1.2,
       tagLabel: 'Cut',
       targetLabel: 'Target daily calories — cut',
-      surplusNote: '−400 kcal deficit below TDEE (~0.8 lb fat loss/week)',
-      bannerText: 'Cut: eat 400 kcal below maintenance to lose roughly 0.8 lb of fat per week. Protein is highest here — in a deficit your body is at risk of burning muscle for fuel, and high protein intake is the primary defense. Carbs stay moderate to support training performance.',
-      footnote: 'Cut deficit −400 kcal (moderate deficit preserves muscle better than aggressive cuts). Protein at 1.2 g/lb bodyweight — the high end of evidence-based ranges for muscle preservation during a calorie deficit (Helms et al. 2014; ISSN). Fat held at 20% minimum for hormonal health.',
+      surplusNote: '−300 kcal deficit below TDEE (~0.6 lb fat loss/week)',
+      bannerText: 'Cut: eat 300 kcal below maintenance to lose roughly 0.6 lb of fat per week. A conservative deficit like this is better for muscle retention than aggressive cuts — especially important since the goal is still to build or preserve muscle. Protein is highest here to protect against muscle breakdown.',
+      footnote: 'Cut deficit −300 kcal/day (~0.6 lb/week) — conservative end of the evidence-based range, prioritizing muscle retention over speed of fat loss (Helms et al. 2014; ISSN). Protein at 1.2 g/lb bodyweight to defend against muscle catabolism in a deficit. Fat held at 20% minimum for hormonal health.',
     },
   };
 
@@ -471,8 +471,8 @@
     let mult, label;
     if (weeklyScore === 0)       { mult = 1.2;   label = 'Sedentary'; }
     else if (weeklyScore <= 1.5) { mult = 1.375; label = 'Lightly active'; }
-    else if (weeklyScore <= 3.5) { mult = 1.55;  label = 'Moderately active'; }
-    else if (weeklyScore <= 5.5) { mult = 1.725; label = 'Very active'; }
+    else if (weeklyScore <= 4.5) { mult = 1.55;  label = 'Moderately active'; }
+    else if (weeklyScore <= 7.0) { mult = 1.725; label = 'Very active'; }
     else                         { mult = 1.9;   label = 'Extra active'; }
     return { mult, label, weeklyScore };
   }
@@ -539,7 +539,7 @@
 
     // Footnote
     document.getElementById('footnote-text').innerHTML =
-      `<strong>Methodology:</strong> BMR via Mifflin-St Jeor (Am. J. Clin. Nutr. 1990). Activity score weights each day by type: low cardio 0.5, strength 0.75, high cardio 0.85, HIIT 1.0. ${cfg.footnote} Fiber: 14g per 1,000 kcal (USDA / Mayo Clinic). Added sugar limits from AHA (men ≤36g, women ≤25g).<br><br><strong>Tracking tip:</strong> ${goal === 'bulk' ? 'Aim for +0.5–1 lb/week weight gain.' : goal === 'recomp' ? 'Weight may stay flat — track measurements and strength gains instead.' : 'Aim for −0.5–1 lb/week. If losing muscle (strength drops), reduce deficit to −300 kcal.'} Adjust by ±100–150 kcal if progress stalls.`;
+      `<strong>Methodology:</strong> BMR via Mifflin-St Jeor (Am. J. Clin. Nutr. 1990). Activity score weights each day by type: mobility/zone 2 0.3, strength 0.75, high cardio 0.85, HIIT 1.0. ${cfg.footnote} Fiber: 14g per 1,000 kcal (USDA / Mayo Clinic). Added sugar limits from AHA (men ≤36g, women ≤25g).<br><br><strong>Tracking tip:</strong> ${goal === 'bulk' ? 'Aim for +0.5–1 lb/week weight gain.' : goal === 'recomp' ? 'Weight may stay flat — track measurements and strength gains instead.' : 'Aim for −0.5–1 lb/week. If losing muscle (strength drops), reduce deficit to −300 kcal.'} Adjust by ±100–150 kcal if progress stalls.`;
 
     resetSliders();
     const resultsEl = document.getElementById('results');
