@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clip Response Study</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Consent screen -->
+  <section id="consent-screen" class="screen">
+    <div class="card consent-card">
+      <h1>Consent to Participate</h1>
+      <p class="muted">Please review the consent form below.</p>
+
+      <object id="consent-pdf" data="consent/consent-form.pdf" type="application/pdf" class="consent-pdf">
+        <p>
+          Your browser can't display the PDF inline.
+          <a href="consent/consent-form.pdf" target="_blank" rel="noopener">Open the consent form in a new tab</a> to review it.
+        </p>
+      </object>
+      <p class="muted pdf-fallback-link">
+        <a href="consent/consent-form.pdf" target="_blank" rel="noopener">Open in a new tab</a>
+      </p>
+
+      <div class="consent-fields">
+        <div class="field">
+          <label for="consent-name">Type your full name to digitally sign</label>
+          <input type="text" id="consent-name" placeholder="Your full name">
+        </div>
+        <div class="field">
+          <label for="consent-date">Date</label>
+          <input type="date" id="consent-date">
+        </div>
+      </div>
+
+      <p class="muted small">By typing your name above and clicking "Accept and Continue", you confirm that you have read and understood the consent form and agree to participate.</p>
+
+      <button id="consent-btn" disabled>Accept and Continue</button>
+    </div>
+  </section>
+
+  <!-- Welcome screen -->
+  <section id="welcome-screen" class="screen" hidden>
+    <div class="card">
+      <h1>Welcome</h1>
+      <p>You'll watch a series of video clip pairs. After each pair, describe what you hear and how it makes you feel in the boxes provided, then click <strong>Next</strong> to continue.</p>
+      <p class="muted">There are <span id="pair-count"></span> pairs in total.</p>
+      <button id="start-btn">Start</button>
+    </div>
+  </section>
+
+  <!-- Pair screen -->
+  <section id="pair-screen" class="screen" hidden>
+    <div class="progress-bar">
+      <div id="progress-fill" class="progress-fill"></div>
+    </div>
+    <p class="progress-label">Pair <span id="pair-index"></span> of <span id="pair-total"></span></p>
+
+    <main class="clip-grid">
+      <section class="clip-panel">
+        <h2>Clip 1</h2>
+        <video id="video-1" controls>
+          Your browser does not support the video tag.
+        </video>
+        <label for="response-1">What do you hear? How does it make you feel?</label>
+        <textarea id="response-1" placeholder="Type your response for Clip 1 here..."></textarea>
+      </section>
+
+      <section class="clip-panel">
+        <h2>Clip 2</h2>
+        <video id="video-2" controls>
+          Your browser does not support the video tag.
+        </video>
+        <label for="response-2">What do you hear? How does it make you feel?</label>
+        <textarea id="response-2" placeholder="Type your response for Clip 2 here..."></textarea>
+      </section>
+    </main>
+
+    <footer>
+      <button id="next-btn">Next</button>
+    </footer>
+  </section>
+
+  <!-- Finish screen -->
+  <section id="finish-screen" class="screen" hidden>
+    <div class="card">
+      <h1>Thank you!</h1>
+      <p class="muted">Please download your responses below, then email the file to the research team.</p>
+      <button id="download-btn">Download my responses (CSV)</button>
+    </div>
+  </section>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
