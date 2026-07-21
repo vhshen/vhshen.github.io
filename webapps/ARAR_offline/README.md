@@ -20,7 +20,16 @@ To use a different consent PDF, replace
 the `data`/`href` paths in the `<!-- Consent screen -->` section of
 [index.html](index.html)).
 
-## 2. Add your video clips
+## 2. Likert scale statements
+
+Each pair screen shows a 7-point Likert scale (1 = Strongly Disagree, 7 =
+Strongly Agree) for both clips, asking participants to rate 8 statements
+(e.g. "The audio was interesting") before they can type their free-text
+answer. Edit the statements in [config.js](config.js) under
+`likertStatements` — the `key` becomes the CSV column suffix, so keep it
+short and unique.
+
+## 3. Add your video clips
 
 Drop your video files into `videos/` and list them in [config.js](config.js)
 under `pairs`. Add or remove entries to change how many pairs the study has:
@@ -33,7 +42,7 @@ pairs: [
 ],
 ```
 
-## 3. Run it locally to test
+## 4. Run it locally to test
 
 Any static file server works, e.g.:
 
@@ -51,7 +60,7 @@ Then open the printed local URL in your browser and click through the whole
 flow: consent → welcome → each pair → download the CSV at the end and check
 it opens correctly in a spreadsheet app.
 
-## 4. Host it online
+## 5. Host it online
 
 Since this is just static files (`index.html`, `style.css`, `app.js`,
 `config.js`, `videos/`, `consent/`), you can drop the whole folder onto any
@@ -70,9 +79,11 @@ session.
 ## How responses are collected
 
 At the end of the study, participants click "Download my responses (CSV)".
-This generates a CSV file (one row per clip pair, columns: participantId,
-consentName, consentDate, consentedAt, startedAt, finishedAt, pairId, clip1,
-clip2, response1, response2, answeredAt) and downloads it to their computer.
-They then email that file to you — nothing is transmitted automatically, so
-make sure your instructions to participants (e.g. in the consent form or a
-follow-up message) tell them where to send it.
+This generates a CSV file (one row per clip pair) with columns:
+participantId, consentName, consentDate, consentedAt, startedAt, finishedAt,
+pairId, clip1, clip2, one `clip1_<key>`/`clip2_<key>` column per Likert
+statement (7-point scale), response1, response2, answeredAt. It downloads to
+their computer, and they then email that file to **vhshen@cmu.edu** —
+nothing is transmitted automatically, so make sure your instructions to
+participants (e.g. in the consent form or a follow-up message) reinforce
+where to send it.

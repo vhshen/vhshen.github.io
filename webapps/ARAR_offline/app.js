@@ -1,5 +1,7 @@
 (function () {
   const pairs = CONFIG.pairs;
+  const likertStatements = CONFIG.likertStatements;
+  const LIKERT_SCALE_SIZE = 7;
 
   const consentScreen = document.getElementById('consent-screen');
   const welcomeScreen = document.getElementById('welcome-screen');
@@ -19,6 +21,8 @@
 
   const video1 = document.getElementById('video-1');
   const video2 = document.getElementById('video-2');
+  const likertContainer1 = document.getElementById('likert-1');
+  const likertContainer2 = document.getElementById('likert-2');
   const response1 = document.getElementById('response-1');
   const response2 = document.getElementById('response-2');
   const nextBtn = document.getElementById('next-btn');
@@ -48,12 +52,82 @@
     [consentScreen, welcomeScreen, pairScreen, finishScreen].forEach((s) => { s.hidden = s !== screen; });
   }
 
+  function buildLikertBlock(container, clipNum) {
+    const instructions = document.createElement('p');
+    instructions.className = 'likert-instructions';
+    instructions.textContent = 'Please rate the following statements about this audio (1 = Strongly Disagree, 7 = Strongly Agree):';
+    container.appendChild(instructions);
+
+    likertStatements.forEach((statement) => {
+      const item = document.createElement('div');
+      item.className = 'likert-item';
+
+      const text = document.createElement('p');
+      text.className = 'likert-statement';
+      text.textContent = statement.text;
+      item.appendChild(text);
+
+      const scale = document.createElement('div');
+      scale.className = 'likert-scale';
+      scale.setAttribute('role', 'radiogroup');
+      scale.setAttribute('aria-label', statement.text);
+
+      for (let value = 1; value <= LIKERT_SCALE_SIZE; value += 1) {
+        const optionLabel = document.createElement('label');
+        optionLabel.className = 'likert-option';
+
+        const input = document.createElement('input');
+        input.type = 'radio';
+        input.name = `clip${clipNum}-${statement.key}`;
+        input.value = String(value);
+
+        optionLabel.appendChild(input);
+        optionLabel.appendChild(document.createTextNode(String(value)));
+        scale.appendChild(optionLabel);
+      }
+
+      item.appendChild(scale);
+
+      const endpoints = document.createElement('div');
+      endpoints.className = 'likert-endpoints';
+      endpoints.innerHTML = '<span>Strongly Disagree</span><span>Strongly Agree</span>';
+      item.appendChild(endpoints);
+
+      container.appendChild(item);
+    });
+  }
+
+  buildLikertBlock(likertContainer1, 1);
+  buildLikertBlock(likertContainer2, 2);
+
+  function resetLikert(container) {
+    container.querySelectorAll('input[type="radio"]').forEach((input) => { input.checked = false; });
+  }
+
+  function getLikertAnswers(clipNum) {
+    const answers = {};
+    likertStatements.forEach((statement) => {
+      const checked = document.querySelector(`input[name="clip${clipNum}-${statement.key}"]:checked`);
+      answers[statement.key] = checked ? checked.value : '';
+    });
+    return answers;
+  }
+
+  function allLikertAnswered(clipNum) {
+    return likertStatements.every((statement) => (
+      document.querySelector(`input[name="clip${clipNum}-${statement.key}"]:checked`)
+    ));
+  }
+
   function updateNextEnabled() {
     if (!CONFIG.requireResponses) {
       nextBtn.disabled = false;
       return;
     }
-    nextBtn.disabled = !(response1.value.trim() && response2.value.trim());
+    nextBtn.disabled = !(
+      response1.value.trim() && response2.value.trim() &&
+      allLikertAnswered(1) && allLikertAnswered(2)
+    );
   }
 
   function loadPair(index) {
@@ -64,6 +138,8 @@
     video2.load();
     response1.value = '';
     response2.value = '';
+    resetLikert(likertContainer1);
+    resetLikert(likertContainer2);
     pairIndexEl.textContent = index + 1;
     progressFill.style.width = `${((index) / pairs.length) * 100}%`;
     nextBtn.textContent = index === pairs.length - 1 ? 'Finish' : 'Next';
@@ -91,6 +167,8 @@
 
   response1.addEventListener('input', updateNextEnabled);
   response2.addEventListener('input', updateNextEnabled);
+  likertContainer1.addEventListener('change', updateNextEnabled);
+  likertContainer2.addEventListener('change', updateNextEnabled);
 
   nextBtn.addEventListener('click', () => {
     const pair = pairs[currentIndex];
@@ -98,6 +176,8 @@
       pairId: pair.id,
       clip1: pair.clip1,
       clip2: pair.clip2,
+      likert1: getLikertAnswers(1),
+      likert2: getLikertAnswers(2),
       response1: response1.value.trim(),
       response2: response2.value.trim(),
       answeredAt: new Date().toISOString(),
@@ -124,16 +204,33 @@
     const finishedAt = new Date().toISOString();
     const consentName = consentNameInput.value.trim();
     const consentDate = consentDateInput.value;
+
+    const likertHeaders = [];
+    likertStatements.forEach((s) => { likertHeaders.push(`clip1_${s.key}`); });
+    likertStatements.forEach((s) => { likertHeaders.push(`clip2_${s.key}`); });
+
     const header = [
       'participantId', 'consentName', 'consentDate', 'consentedAt',
       'startedAt', 'finishedAt',
-      'pairId', 'clip1', 'clip2', 'response1', 'response2', 'answeredAt',
+      'pairId', 'clip1', 'clip2',
+      ...likertHeaders,
+      'response1', 'response2', 'answeredAt',
     ];
-    const rows = collectedResponses.map((r) => [
-      participantId, consentName, consentDate, consentedAt,
-      startedAt, finishedAt,
-      r.pairId, r.clip1, r.clip2, r.response1, r.response2, r.answeredAt,
-    ]);
+
+    const rows = collectedResponses.map((r) => {
+      const likertValues = [
+        ...likertStatements.map((s) => r.likert1[s.key]),
+        ...likertStatements.map((s) => r.likert2[s.key]),
+      ];
+      return [
+        participantId, consentName, consentDate, consentedAt,
+        startedAt, finishedAt,
+        r.pairId, r.clip1, r.clip2,
+        ...likertValues,
+        r.response1, r.response2, r.answeredAt,
+      ];
+    });
+
     return [header, ...rows].map((row) => row.map(csvEscape).join(',')).join('\r\n');
   }
 

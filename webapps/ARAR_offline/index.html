@@ -45,7 +45,8 @@
   <section id="welcome-screen" class="screen" hidden>
     <div class="card">
       <h1>Welcome</h1>
-      <p>You'll watch a series of video clip pairs. After each pair, describe what you hear and how it makes you feel in the boxes provided, then click <strong>Next</strong> to continue.</p>
+      <p>Thank you for participating in this asynchronous audio study! For best results, please ensure you are in a quiet environment, and use headphones.</p>
+      <p>You'll watch a series of video clip pairs. For each video, please describe what you hear and how it makes you feel in the boxes provided, then click <strong>Next</strong> to continue.</p>
       <p class="muted">There are <span id="pair-count"></span> pairs in total.</p>
       <button id="start-btn">Start</button>
     </div>
@@ -64,7 +65,8 @@
         <video id="video-1" controls>
           Your browser does not support the video tag.
         </video>
-        <label for="response-1">What do you hear? How does it make you feel?</label>
+        <div id="likert-1" class="likert-block"></div>
+        <label for="response-1">What words would you use to describe the audio?</label>
         <textarea id="response-1" placeholder="Type your response for Clip 1 here..."></textarea>
       </section>
 
@@ -73,7 +75,8 @@
         <video id="video-2" controls>
           Your browser does not support the video tag.
         </video>
-        <label for="response-2">What do you hear? How does it make you feel?</label>
+        <div id="likert-2" class="likert-block"></div>
+        <label for="response-2">What words would you use to describe the audio?</label>
         <textarea id="response-2" placeholder="Type your response for Clip 2 here..."></textarea>
       </section>
     </main>
@@ -87,7 +90,7 @@
   <section id="finish-screen" class="screen" hidden>
     <div class="card">
       <h1>Thank you!</h1>
-      <p class="muted">Please download your responses below, then email the file to the research team.</p>
+      <p class="muted">Please download your responses below, then email the file to vhshen@cmu.edu.</p>
       <button id="download-btn">Download my responses (CSV)</button>
     </div>
   </section>

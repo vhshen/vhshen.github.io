@@ -2,16 +2,30 @@
 // Edit this file to set up your study: add or remove clip pairs below.
 
 const CONFIG = {
-  // If true, participants must type something in both boxes before "Next" is enabled.
+  // If true, participants must type something in both boxes and answer every
+  // Likert statement for both clips before "Next" is enabled.
   requireResponses: true,
+
+  // 7-point Likert statements asked about each clip. Shown identically for
+  // both Clip 1 and Clip 2. `key` is used as the CSV column suffix.
+  likertStatements: [
+    { key: "interesting", text: "The audio was interesting" },
+    { key: "pleasant", text: "The audio was pleasant" },
+    { key: "fun", text: "It was fun to listen to the audio" },
+    { key: "boring", text: "It was boring to listen to the audio" },
+    { key: "confusing", text: "It was confusing to listen to the audio" },
+    { key: "realistic", text: "The audio was realistic" },
+    { key: "appropriate", text: "The audio was appropriate when and where I heard it" },
+    { key: "immersive", text: "The audio was immersive" },
+  ],
 
   // One entry per pair the participant will see, in order.
   // Put your video files in the videos/ folder with matching names.
   pairs: [
-    { id: "pair1", clip1: "videos/pair1_clip1.mp4", clip2: "videos/pair1_clip2.mp4" },
-    { id: "pair2", clip1: "videos/pair2_clip1.mp4", clip2: "videos/pair2_clip2.mp4" },
-    { id: "pair3", clip1: "videos/pair3_clip1.mp4", clip2: "videos/pair3_clip2.mp4" },
-    { id: "pair4", clip1: "videos/pair4_clip1.mp4", clip2: "videos/pair4_clip2.mp4" },
-    { id: "pair5", clip1: "videos/pair5_clip1.mp4", clip2: "videos/pair5_clip2.mp4" },
+    { id: "pair1", clip1: "videos/carrots_aug.mp4", clip2: "videos/carrots_norm.mp4" },
+    { id: "pair2", clip1: "videos/opencan_norm.mp4", clip2: "videos/opencan_aug.mp4" },
+    { id: "pair3", clip1: "videos/vacuum_norm.mp4", clip2: "videos/vacuum_aug.mp4" },
+    { id: "pair4", clip1: "videos/toothbrush_aug.mp4", clip2: "videos/toothbrush_norm.mp4" },
+    { id: "pair5", clip1: "videos/engine_norm.mp4", clip2: "videos/engine_aug.mp4" },
   ],
 };
