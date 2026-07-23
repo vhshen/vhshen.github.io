@@ -220,21 +220,43 @@ button:disabled {
 
 .likert-scale {
   display: flex;
-  justify-content: space-between;
-  gap: 0.25rem;
+  gap: 0.35rem;
 }
 
 .likert-option {
+  position: relative;
+  flex: 1;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.2rem;
-  font-size: 0.75rem;
+  justify-content: center;
+  padding: 0.4rem 0;
+  font-size: 0.85rem;
+  font-weight: 600;
   color: var(--muted);
   cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fffdfb;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.likert-option:hover {
+  border-color: var(--accent);
+}
+
+.likert-option:has(input:checked) {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
 }
 
 .likert-option input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
   cursor: pointer;
 }
 
@@ -262,6 +284,64 @@ button:disabled {
 .clip-panel textarea:focus {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
+}
+
+/* Comparison question */
+.comparison-question {
+  max-width: 1000px;
+  margin: 1.5rem auto 0;
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.comparison-question-text {
+  margin: 0 0 1rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--accent-dark);
+}
+
+.comparison-options {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.comparison-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 10rem;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fffdfb;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.comparison-option:hover {
+  border-color: var(--accent);
+}
+
+.comparison-option:has(input:checked) {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.comparison-option input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
 }
 
 /* Footer / nav */

@@ -59,6 +59,8 @@
     </div>
     <p class="progress-label">Pair <span id="pair-index"></span> of <span id="pair-total"></span></p>
 
+    <h1>Please watch <b><i>both</i></b> videos below. Feel free to repeat as many times as you'd like. Then, answer all questions before proceeding.</h1>
+
     <main class="clip-grid">
       <section class="clip-panel">
         <h2>Clip 1</h2>
@@ -81,6 +83,11 @@
       </section>
     </main>
 
+    <section class="comparison-question card">
+      <p id="comparison-question-text" class="comparison-question-text"></p>
+      <div id="comparison-options" class="comparison-options" role="radiogroup" aria-label="Clip comparison"></div>
+    </section>
+
     <footer>
       <button id="next-btn">Next</button>
     </footer>
@@ -90,7 +97,7 @@
   <section id="finish-screen" class="screen" hidden>
     <div class="card">
       <h1>Thank you!</h1>
-      <p class="muted">Please download your responses below, then email the file to vhshen@cmu.edu.</p>
+      <p class="muted">Please download your responses below, then email the file to <a href="mailto:vhshen@cmu.edu">vhshen@cmu.edu</a>.</p>
       <button id="download-btn">Download my responses (CSV)</button>
     </div>
   </section>

@@ -25,6 +25,8 @@
   const likertContainer2 = document.getElementById('likert-2');
   const response1 = document.getElementById('response-1');
   const response2 = document.getElementById('response-2');
+  const comparisonQuestionText = document.getElementById('comparison-question-text');
+  const comparisonOptions = document.getElementById('comparison-options');
   const nextBtn = document.getElementById('next-btn');
 
   const downloadBtn = document.getElementById('download-btn');
@@ -104,6 +106,38 @@
     container.querySelectorAll('input[type="radio"]').forEach((input) => { input.checked = false; });
   }
 
+  function buildComparisonOptions() {
+    comparisonOptions.innerHTML = '';
+    ['1', '2'].forEach((clipNum) => {
+      const optionLabel = document.createElement('label');
+      optionLabel.className = 'comparison-option';
+
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'comparison-choice';
+      input.value = clipNum;
+
+      optionLabel.appendChild(input);
+      optionLabel.appendChild(document.createTextNode(`Clip ${clipNum}`));
+      comparisonOptions.appendChild(optionLabel);
+    });
+  }
+
+  buildComparisonOptions();
+
+  function resetComparison() {
+    comparisonOptions.querySelectorAll('input[type="radio"]').forEach((input) => { input.checked = false; });
+  }
+
+  function getComparisonAnswer() {
+    const checked = comparisonOptions.querySelector('input[name="comparison-choice"]:checked');
+    return checked ? checked.value : '';
+  }
+
+  function comparisonAnswered() {
+    return Boolean(comparisonOptions.querySelector('input[name="comparison-choice"]:checked'));
+  }
+
   function getLikertAnswers(clipNum) {
     const answers = {};
     likertStatements.forEach((statement) => {
@@ -126,7 +160,8 @@
     }
     nextBtn.disabled = !(
       response1.value.trim() && response2.value.trim() &&
-      allLikertAnswered(1) && allLikertAnswered(2)
+      allLikertAnswered(1) && allLikertAnswered(2) &&
+      comparisonAnswered()
     );
   }
 
@@ -140,6 +175,8 @@
     response2.value = '';
     resetLikert(likertContainer1);
     resetLikert(likertContainer2);
+    comparisonQuestionText.textContent = `Which clip would you describe as "${pair.comparisonWord}"?`;
+    resetComparison();
     pairIndexEl.textContent = index + 1;
     progressFill.style.width = `${((index) / pairs.length) * 100}%`;
     nextBtn.textContent = index === pairs.length - 1 ? 'Finish' : 'Next';
@@ -169,6 +206,7 @@
   response2.addEventListener('input', updateNextEnabled);
   likertContainer1.addEventListener('change', updateNextEnabled);
   likertContainer2.addEventListener('change', updateNextEnabled);
+  comparisonOptions.addEventListener('change', updateNextEnabled);
 
   nextBtn.addEventListener('click', () => {
     const pair = pairs[currentIndex];
@@ -180,6 +218,8 @@
       likert2: getLikertAnswers(2),
       response1: response1.value.trim(),
       response2: response2.value.trim(),
+      comparisonWord: pair.comparisonWord,
+      comparisonAnswer: getComparisonAnswer(),
       answeredAt: new Date().toISOString(),
     });
 
@@ -214,7 +254,8 @@
       'startedAt', 'finishedAt',
       'pairId', 'clip1', 'clip2',
       ...likertHeaders,
-      'response1', 'response2', 'answeredAt',
+      'response1', 'response2',
+      'comparisonWord', 'comparisonAnswer', 'answeredAt',
     ];
 
     const rows = collectedResponses.map((r) => {
@@ -227,7 +268,8 @@
         startedAt, finishedAt,
         r.pairId, r.clip1, r.clip2,
         ...likertValues,
-        r.response1, r.response2, r.answeredAt,
+        r.response1, r.response2,
+        r.comparisonWord, r.comparisonAnswer, r.answeredAt,
       ];
     });
 

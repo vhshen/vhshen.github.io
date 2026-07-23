@@ -16,16 +16,21 @@ const CONFIG = {
     { key: "confusing", text: "It was confusing to listen to the audio" },
     { key: "realistic", text: "The audio was realistic" },
     { key: "appropriate", text: "The audio was appropriate when and where I heard it" },
-    { key: "immersive", text: "The audio was immersive" },
+    // { key: "immersive", text: "The audio was immersive" },
   ],
 
   // One entry per pair the participant will see, in order.
   // Put your video files in the videos/ folder with matching names.
+  //
+  // `comparisonWord` fills the blank in the forced-choice question shown at
+  // the bottom of each pair screen: "Which clip would you describe as
+  // '<comparisonWord>'?" — edit each one to the word/phrase you want for
+  // that specific pair.
   pairs: [
-    { id: "pair1", clip1: "videos/carrots_aug.mp4", clip2: "videos/carrots_norm.mp4" },
-    { id: "pair2", clip1: "videos/opencan_norm.mp4", clip2: "videos/opencan_aug.mp4" },
-    { id: "pair3", clip1: "videos/vacuum_norm.mp4", clip2: "videos/vacuum_aug.mp4" },
-    { id: "pair4", clip1: "videos/toothbrush_aug.mp4", clip2: "videos/toothbrush_norm.mp4" },
-    { id: "pair5", clip1: "videos/engine_norm.mp4", clip2: "videos/engine_aug.mp4" },
+    { id: "pair1", clip1: "videos/carrots_aug.mp4", clip2: "videos/carrots_norm.mp4", comparisonWord: "crunchier" },
+    { id: "pair2", clip1: "videos/opencan_norm.mp4", clip2: "videos/opencan_aug.mp4", comparisonWord: "fizzier" },
+    { id: "pair3", clip1: "videos/vacuum_norm.mp4", clip2: "videos/vacuum_aug.mp4", comparisonWord: "more pleasant" },
+    { id: "pair4", clip1: "videos/toothbrush_aug.mp4", clip2: "videos/toothbrush_norm.mp4", comparisonWord: "rougher" },
+    { id: "pair5", clip1: "videos/engine_norm.mp4", clip2: "videos/engine_aug.mp4", comparisonWord: "sportier" },
   ],
 };

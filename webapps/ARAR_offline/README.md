@@ -32,12 +32,16 @@ short and unique.
 ## 3. Add your video clips
 
 Drop your video files into `videos/` and list them in [config.js](config.js)
-under `pairs`. Add or remove entries to change how many pairs the study has:
+under `pairs`. Add or remove entries to change how many pairs the study has.
+Each pair also needs a `comparisonWord` — it fills the blank in a
+forced-choice question shown at the bottom of that pair's screen: "Which clip
+would you describe as '**comparisonWord**'?" (participant picks Clip 1 or
+Clip 2). This can be a different word/phrase per pair:
 
 ```js
 pairs: [
-  { id: "pair1", clip1: "videos/pair1_clip1.mp4", clip2: "videos/pair1_clip2.mp4" },
-  { id: "pair2", clip1: "videos/pair2_clip1.mp4", clip2: "videos/pair2_clip2.mp4" },
+  { id: "pair1", clip1: "videos/pair1_clip1.mp4", clip2: "videos/pair1_clip2.mp4", comparisonWord: "more realistic" },
+  { id: "pair2", clip1: "videos/pair2_clip1.mp4", clip2: "videos/pair2_clip2.mp4", comparisonWord: "louder" },
   // add as many as you like...
 ],
 ```
@@ -82,7 +86,9 @@ At the end of the study, participants click "Download my responses (CSV)".
 This generates a CSV file (one row per clip pair) with columns:
 participantId, consentName, consentDate, consentedAt, startedAt, finishedAt,
 pairId, clip1, clip2, one `clip1_<key>`/`clip2_<key>` column per Likert
-statement (7-point scale), response1, response2, answeredAt. It downloads to
+statement (7-point scale), response1, response2, comparisonWord,
+comparisonAnswer (`1` or `2`, which clip the participant picked), answeredAt.
+It downloads to
 their computer, and they then email that file to **vhshen@cmu.edu** —
 nothing is transmitted automatically, so make sure your instructions to
 participants (e.g. in the consent form or a follow-up message) reinforce
