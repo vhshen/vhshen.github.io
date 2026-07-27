@@ -11,11 +11,16 @@ const CONFIG = {
   likertStatements: [
     { key: "interesting", text: "The audio was interesting" },
     { key: "pleasant", text: "The audio was pleasant" },
+    { key: "helpful", text: "The audio was helpful" },
+    { key: "easy", text: "The audio was easy to understand" },
+    { key: "relatable", text: "The audio was relatable to its ideas" },
+    { key: "match", text: "It was easy to match the audio to the video" },
     { key: "fun", text: "It was fun to listen to the audio" },
     { key: "boring", text: "It was boring to listen to the audio" },
     { key: "confusing", text: "It was confusing to listen to the audio" },
-    { key: "realistic", text: "The audio was realistic" },
-    { key: "appropriate", text: "The audio was appropriate when and where I heard it" },
+    { key: "understanding", text: "It was easy to understand the audio" }
+    // { key: "realistic", text: "The audio was realistic" },
+    // { key: "appropriate", text: "The audio was appropriate when and where I heard it" },
     // { key: "immersive", text: "The audio was immersive" },
   ],
 
